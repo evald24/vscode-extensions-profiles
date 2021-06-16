@@ -35,16 +35,20 @@
   "contributes": {
     "commands": [
       {
-        "command": "vscode-extension-profiles.Select",
-        "title": "Extension profiles - Select profile"
+        "command": "vscode-extension-profiles.Apply",
+        "title": "Extension profiles: Select and apply profile"
       },
       {
         "command": "vscode-extension-profiles.Edite",
-        "title": "Extension profiles - Edite profile"
+        "title": "Extension profiles: Edite profile"
+      },
+      {
+        "command": "vscode-extension-profiles.Refresh",
+        "title": "Extension profiles: Refresh the storage of installed extensions"
       },
       {
         "command": "vscode-extension-profiles.Delete",
-        "title": "Extension profiles - Delete profile"
+        "title": "Extension profiles: Delete profile"
       }
     ],
     "configuration": {
@@ -97,7 +101,8 @@
     }
   },
   "activationEvents": [
-    "onCommand:vscode-extension-profiles.Select",
+    "onCommand:vscode-extension-profiles.Refresh",
+    "onCommand:vscode-extension-profiles.Apply",
     "onCommand:vscode-extension-profiles.Edite",
     "onCommand:vscode-extension-profiles.Delete"
   ],
@@ -105,6 +110,7 @@
     "@types/glob": "^7.1.3",
     "@types/mocha": "^8.2.2",
     "@types/node": "14.x",
+    "@types/sqlite3": "^3.1.7",
     "@types/vscode": "^1.57.0",
     "@typescript-eslint/eslint-plugin": "^4.26.0",
     "@typescript-eslint/parser": "^4.26.0",
@@ -117,5 +123,9 @@
   "engines": {
     "vscode": "^1.57.0"
   },
-  "preview": true
+  "preview": true,
+  "dependencies": {
+    "sqlite": "^4.0.23",
+    "sqlite3": "^5.0.2"
+  }
 }
