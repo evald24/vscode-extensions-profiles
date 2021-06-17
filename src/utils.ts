@@ -1,5 +1,7 @@
 import { promisify } from "util";
 import * as vscode from "vscode";
+import { getGlobalStorageValue } from "./storage";
+import { ExtensionList, ProfileList } from "./types";
 
 import path = require("path");
 import fs = require("fs");
@@ -34,12 +36,12 @@ export function getExtensionsPath(): string {
 }
 
 // Workspace storage
-export function getWorkspaceStorage(): string {
+export function getWorkspaceStoragePath(): string {
   return `${getVSCodePath()}/User/workspaceStorage`;
 }
 
 // Global storage
-export function getGlobalStorage(): string {
+export function getGlobalStoragePath(): string {
   return `${getVSCodePath()}/User/globalStorage`;
 }
 
@@ -54,7 +56,7 @@ export function getGlobalStorage(): string {
 // ];
 
 export async function getWorkspaceUUID(uriWorkspace: vscode.Uri): Promise<string> {
-  let pathWorkspaceStorage = getWorkspaceStorage();
+  let pathWorkspaceStorage = getWorkspaceStoragePath();
   const files = await getFiles(pathWorkspaceStorage, "workspace.json");
   const uuid = (await searchFolderWorkspace(files, uriWorkspace))[0]?.replace(pathWorkspaceStorage + "/", "").replace("/workspace.json", "");
   return uuid!;
@@ -88,7 +90,7 @@ async function searchFolderWorkspace(files: string[], uriWorkspace: vscode.Uri) 
   ).then((allData) => allData.filter((x) => x !== undefined));
 }
 
-export default function fileUrl(filePath: string, options: any = { resolve: true }) {
+export  function fileUrl(filePath: string, options: any = { resolve: true }) {
   if (typeof filePath !== "string") {
     throw new TypeError(`Expected a string, got ${typeof filePath}`);
   }
@@ -108,4 +110,12 @@ export default function fileUrl(filePath: string, options: any = { resolve: true
   // Escape required characters for path components.
   // See: https://tools.ietf.org/html/rfc3986#section-3.3
   return encodeURI(`file://${pathName}`).replace(/[?#]/g, encodeURIComponent);
+}
+
+export async function getProfileList() {
+  return await getGlobalStorageValue("vscodeExtensionProfiles/profile") as ProfileList;
+}
+
+export async function getExtensionList() {
+  return await getGlobalStorageValue("vscodeExtensionProfiles/profile") as ExtensionList;
 }

@@ -36,19 +36,28 @@
     "commands": [
       {
         "command": "vscode-extension-profiles.Apply",
-        "title": "Extension profiles: Select and apply profile"
+        "title": "Extension profiles: Select and apply profile",
+        "shortTitle": "Select and apply profile"
       },
       {
-        "command": "vscode-extension-profiles.Edite",
-        "title": "Extension profiles: Edite profile"
+        "command": "vscode-extension-profiles.Create",
+        "title": "Extension profiles: Create profile",
+        "shortTitle": "Create profile"
+      },
+      {
+        "command": "vscode-extension-profiles.CreateOrEdite",
+        "title": "Extension profiles: Create or edite profile",
+        "shortTitle": "Edite profile"
       },
       {
         "command": "vscode-extension-profiles.Refresh",
-        "title": "Extension profiles: Refresh the storage of installed extensions"
+        "title": "Extension profiles: Refresh list of installed extensions",
+        "shortTitle": "Refresh list of installed extensions"
       },
       {
         "command": "vscode-extension-profiles.Delete",
-        "title": "Extension profiles: Delete profile"
+        "title": "Extension profiles: Delete profile",
+        "shortTitle": "Delete profile"
       }
     ],
     "configuration": {
@@ -101,10 +110,12 @@
     }
   },
   "activationEvents": [
-    "onCommand:vscode-extension-profiles.Refresh",
     "onCommand:vscode-extension-profiles.Apply",
+    "onCommand:vscode-extension-profiles.Create",
     "onCommand:vscode-extension-profiles.Edite",
-    "onCommand:vscode-extension-profiles.Delete"
+    "onCommand:vscode-extension-profiles.Delete",
+    "onCommand:vscode-extension-profiles.Refresh",
+    "onStartupFinished"
   ],
   "devDependencies": {
     "@types/glob": "^7.1.3",

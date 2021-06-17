@@ -1,32 +1,33 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 
 import * as vscode from "vscode";
-import { getExtensionList, getProfiles, setExtensionList } from "./config";
-import { getAllExtensions } from "./storage";
+import { getAllExtensions, setGlobalStorageValue } from "./storage";
 import { ExtensionList } from "./types";
+import { getExtensionList, getProfileList, getWorkspaceUUID } from "./utils";
 export const CommandTypes = [
-  "vscode-extension-profiles.Apply",
   "vscode-extension-profiles.Refresh",
+  "vscode-extension-profiles.Create",
   "vscode-extension-profiles.Edite",
+  "vscode-extension-profiles.Apply",
   "vscode-extension-profiles.Delete",
 ] as const;
 
 type Args = { ctx: vscode.ExtensionContext };
 
 export const Commands: Record<typeof CommandTypes[number], (args: Args) => any> = {
-  "vscode-extension-profiles.Apply": applyProfile,
-  "vscode-extension-profiles.Edite": editeProfile,
   "vscode-extension-profiles.Refresh": refreshExtensionList,
+  "vscode-extension-profiles.Create": createProfile,
+  "vscode-extension-profiles.Edite": editeProfile,
+  "vscode-extension-profiles.Apply": applyProfile,
   "vscode-extension-profiles.Delete": deleteProfile,
 };
 
-const isDev = true;
 // Select profile ...
-async function applyProfile({ ctx }: Args) {
-  const profiles = getProfiles();
+async function applyProfile() {
+  const profiles = await getProfileList();
   const profilesKeys = Object.keys(profiles);
   if (profilesKeys.length <= 0) {
-    vscode.window.showErrorMessage("Extension profiles: No profiles found, please create a profile first.", { modal: true });
+    vscode.window.showErrorMessage("No profiles found, please create a profile first.", { modal: true });
     return;
   }
 
@@ -34,11 +35,10 @@ async function applyProfile({ ctx }: Args) {
   if (vscode.workspace.workspaceFolders !== undefined) {
     fsPath = vscode.workspace.workspaceFolders[0].uri.fsPath;
   } else {
-    vscode.window.showErrorMessage("Extension profiles: Working folder not found, open a folder an try again", { modal: true });
+    vscode.window.showErrorMessage("Working folder not found, open a folder an try again", { modal: true });
     return;
   }
 
-  // console.log(vscode.extensions.all.filter((e) => /^(?!\/Applications\/Visual Studio Code.app\/).*$/g.test(e.extensionPath)));
   let itemsProfiles: vscode.QuickPickItem[] = [];
 
   for (const item of profilesKeys) {
@@ -55,27 +55,82 @@ async function applyProfile({ ctx }: Args) {
     }
     profile = selection.label;
   });
+
   console.log(profile);
 
   let itemsWorkspace: vscode.QuickPickItem[] = [];
 
-  // let uuid = await getWorkspaceUUID(vscode.Uri.parse(fsPath));
+  let uuid = await getWorkspaceUUID(vscode.Uri.parse(fsPath));
 }
 
-async function refreshExtensionList() {
-  let oldConfig = getExtensionList(),
-    keysConfig = Object.keys(oldConfig);
-  let newConfig: ExtensionList = {};
+export async function createProfile() {
+  const profiles = getProfileList(),
+    profilesKeys = Object.keys(profiles);
+
+  // set name profile
+  let profileName;
+  let placeHolder = "Come up with a profile name";
+  while (true) {
+    profileName = await vscode.window.showInputBox({ placeHolder });
+
+    if (profileName && profilesKeys.includes(profileName)) {
+      placeHolder = `The profile \"${profileName}\" already exists, think of another name`;
+      continue; //go next step
+    } else if (!profileName) {
+      return; // close input box
+    }
+
+    break;
+  }
+
+  // check and refresh extension list
+  let extInCache = await getExtensionList(),
+    extKeys = Object.keys(extInCache);
+
+  // update if not exist
+  if (extKeys.length === 0) {
+    extInCache = await refreshExtensionList();
+    extKeys = Object.keys(extInCache);
+  }
+
+  // create extension list
+  let itemsWorkspace: vscode.QuickPickItem[] = [];
+  for (const key of extKeys) {
+    let item = extInCache[key];
+    itemsWorkspace.push({
+      label: item.label || key,
+      description: item.label ? key : undefined,
+      detail: item.description || " - - - - - ",
+    });
+  }
+
+  // show and select extensions
+  let selected = await vscode.window.showQuickPick(itemsWorkspace, {
+    canPickMany: true,
+    placeHolder: "The selected extensions will be enabled for the workspace, while others will be disabled.",
+  });
+
+  console.log(selected);
+}
+
+export async function refreshExtensionList() {
+  let oldExtensionList = await getExtensionList(),
+    keys = Object.keys(oldExtensionList);
+  let newExtensionList: ExtensionList = {};
 
   for (const item of await getAllExtensions()) {
-    if (!item.label) {
+    if (!item.label || !item.description) {
       item.label = item.id;
-      if (keysConfig.length > 0) {
-        for (const key of keysConfig) {
+      if (keys.length > 0) {
+        for (const key of keys) {
           if (item.id === key) {
-            if (oldConfig[key].label) {
-              // Если в конфиге указано имя расширения
-              item.label === oldConfig[key].label;
+            if (item.label === key) {
+              if (oldExtensionList[key].label) {
+                item.label = oldExtensionList[key].label;
+              }
+            }
+            if (oldExtensionList[key].description) {
+              item.description = oldExtensionList[key].description;
             }
             break;
           }
@@ -83,68 +138,19 @@ async function refreshExtensionList() {
       }
     }
 
-    newConfig[item.id] = {
+    newExtensionList[item.id] = {
       uuid: item.uuid,
       label: item.label,
+      description: item.description,
     };
   }
 
-  await setExtensionList(newConfig);
+  await setGlobalStorageValue("vscodeExtensionProfiles/extensions", newExtensionList);
 
-  vscode.window.showInformationMessage("Extension profiles: Updated the list of installed extensions");
+  vscode.window.showInformationMessage("Updated the list of installed extensions");
+  return newExtensionList;
 }
 
-// Select profile ...
-// async function selectProfile({ ctx }: Args) {
-//   console.log(ctx);
-//   // vscode.commands.executeCommand('workbench.extensions.installExtension', 'extensionId');
-//   // vscode.commands.executeCommand("workbench.action.reloadWindow");
-//   // let list = vscode.commands.executeCommand("workbench.extensions.search", "@installed ");
-//   // let list = vscode.commands.executeCommand("workbench.action.openDefaultKeybindingsFile");
-//   // console.log(list);
-//   let fsPath;
-//   if (vscode.workspace.workspaceFolders !== undefined) {
-//     fsPath = vscode.workspace.workspaceFolders[0].uri.fsPath;
-//   } else {
-//     vscode.window.showErrorMessage("vscode-extension-profiles: Working folder not found, open a folder an try again");
-//     return;
-//   }
-
-//   console.log(await getWorkspaceUUID(vscode.Uri.parse(fsPath)));
-
-//   // console.log(vscode.extensions.all.filter((e) => /^(?!\/Applications\/Visual Studio Code.app\/).*$/g.test(e.extensionPath)));
-//   let items: vscode.QuickPickItem[] = [];
-
-//   console.log(Object.keys(getProfiles()));
-
-//   for (const item of Object.keys(getProfiles())) {
-//     items.push({
-//       label: item,
-//     });
-//   }
-
-//   // for (const item of getAllExtensions()) {
-//   //   items.push({
-//   //     label: item.packageJSON.displayName || item.packageJSON.name || item.id,
-//   //     description: item.id,
-//   //     detail: item.packageJSON.description,
-//   //     picked: true,
-//   //   });
-//   // }
-
-//   vscode.window
-//     .showQuickPick(items, {
-//       canPickMany: true,
-//     })
-//     .then((selection) => {
-//       // the user canceled the selection
-//       if (!selection) {
-//         return;
-//       }
-
-//       console.log(selection);
-//     });
-// }
 // Edite profile ...
 async function editeProfile({ ctx }: Args) {
   console.log(ctx);
