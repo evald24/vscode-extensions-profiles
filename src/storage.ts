@@ -2,7 +2,7 @@ import { open } from "sqlite";
 import * as sqlite3 from "sqlite3";
 import * as vscode from "vscode";
 import { ExtensionList, ExtensionValue, ProfileList, StorageKey, StorageValue } from "./types";
-import { getGlobalStoragePath } from "./utils";
+import { getGlobalStoragePath, getWorkspaceStoragePath } from "./utils";
 
 
 export async function getDisabledExtensionsInGlobalStorage() {
@@ -17,7 +17,7 @@ export async function getDisabledExtensionsInGlobalStorage() {
     return JSON.parse(data.value) as ExtensionValue[];
   }
 
-  return [];
+  return []; // default
 }
 
 export async function getAllExtensions() {
@@ -53,28 +53,19 @@ export function getEnabledExtensions() {
     }) as ExtensionValue);
 }
 
-export async function getDisabledExtensionsInWorkspaceStorage(pathDB: string) {
+export async function getWorkspaceStorageValue(uuid: string, key: "enabled" | "disabled") {
   const db = await open({
-    filename: pathDB,
+    filename: `${getWorkspaceStoragePath()}/${uuid}/state.vscdb`,
     driver: sqlite3.Database,
   });
 
-  let data = (await db.get("SELECT key, value FROM ItemTable WHERE key = ?", "extensionsIdentifiers/disabled")) as StorageValue;
-  let value = JSON.parse(data.value) as ExtensionValue[];
+  let data = (await db.get("SELECT key, value FROM ItemTable WHERE key = ?", `extensionsIdentifiers/${key}`)) as StorageValue;
 
-  return value;
-}
+  if (data?.value) {
+    return JSON.parse(data.value) as ExtensionValue[];
+  }
 
-export async function getEnabledExtensionsInWorkspaceStorage(pathDB: string) {
-  const db = await open({
-    filename: pathDB,
-    driver: sqlite3.Database,
-  });
-
-  let data = (await db.get("SELECT key, value FROM ItemTable WHERE key = ?", "extensionsIdentifiers/enabled")) as StorageValue;
-  let value = JSON.parse(data.value) as ExtensionValue[];
-
-  return value;
+  return []; // default
 }
 
 // setDisabledExtensionsInWorkspaceStorage
@@ -88,9 +79,9 @@ export async function getEnabledExtensionsInWorkspaceStorage(pathDB: string) {
 // Все отмеченые плагины помещать в extensionsIdentifiers/enabled
 // Все не отмеченые плагины помещать в extensionsIdentifiers/disabled
 
-export async function setExtensionsInWorkspaceStorage(pathDB: string, extensions: ExtensionValue[], key: "enabled" | "disabled") {
+export async function setWorkspaceStorageValue(uuid: string,  key: "enabled" | "disabled", extensions: ExtensionValue[]) {
   const db = await open({
-    filename: pathDB,
+    filename: `${getWorkspaceStoragePath()}/${uuid}/state.vscdb`,
     driver: sqlite3.Database,
   });
 
@@ -104,7 +95,7 @@ export async function setGlobalStorageValue(key: StorageKey, value: ExtensionLis
     driver: sqlite3.Database,
   });
 
-  return await db.run("INSERT OR REPLACE INTO ItemTable (key, value) VALUES (?, ?)", `vscodeExtensionProfiles/extensions`, JSON.stringify(value));
+  return await db.run("INSERT OR REPLACE INTO ItemTable (key, value) VALUES (?, ?)", key, JSON.stringify(value));
 }
 
 export async function getGlobalStorageValue(key: StorageKey) : Promise<ExtensionList | ProfileList>{
@@ -115,10 +106,10 @@ export async function getGlobalStorageValue(key: StorageKey) : Promise<Extension
 
   let data = (await db.get("SELECT key, value FROM ItemTable WHERE key = ?", key)) as StorageValue;
 
-  let value = {}; // default
+
   if (data?.value) {
-    value = JSON.parse(data.value);
+    return JSON.parse(data.value);
   }
 
-  return value;
+  return {}; // default
 }

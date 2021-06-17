@@ -45,16 +45,6 @@ export function getGlobalStoragePath(): string {
   return `${getVSCodePath()}/User/globalStorage`;
 }
 
-// extensionsIdentifiers/disabled
-// [
-//   {
-//   "id": "vinicioslc.adb-interface-vscode", "uuid": "3168cc76-e4fd-41e5-b405-277c5fc7dafa"
-//   },
-//   {
-//     "id": "aaron-bond.better-comments", "uuid": "7a0110bb-231a-4598-aa1b-0769ea46d28b"
-//   }
-// ];
-
 export async function getWorkspaceUUID(uriWorkspace: vscode.Uri): Promise<string> {
   let pathWorkspaceStorage = getWorkspaceStoragePath();
   const files = await getFiles(pathWorkspaceStorage, "workspace.json");
@@ -113,9 +103,9 @@ export  function fileUrl(filePath: string, options: any = { resolve: true }) {
 }
 
 export async function getProfileList() {
-  return await getGlobalStorageValue("vscodeExtensionProfiles/profile") as ProfileList;
+  return await getGlobalStorageValue("vscodeExtensionProfiles/profiles") as ProfileList;
 }
 
 export async function getExtensionList() {
-  return await getGlobalStorageValue("vscodeExtensionProfiles/profile") as ExtensionList;
+  return await getGlobalStorageValue("vscodeExtensionProfiles/extensions") as ExtensionList;
 }

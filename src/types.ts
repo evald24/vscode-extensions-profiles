@@ -2,7 +2,7 @@ export type StorageValue = { key: string; value: string };
 export type ExtensionValue = { id: string; uuid: string; label?: string; description?: string };
 
 export type ProfileList = {
-  [key: string]: [string];
+  [key: string]: ExtensionList;
 };
 
 export type ExtensionList = {
@@ -16,4 +16,4 @@ export type ExtensionList = {
 
 
 export type StorageKey = `vscodeExtensionProfiles/${StorageKeyID}`;
-export type StorageKeyID = "profile" | "extensions";
+export type StorageKeyID = "profiles" | "extensions";
