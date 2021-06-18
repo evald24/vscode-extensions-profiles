@@ -1,71 +1,33 @@
-# vscode-extension-profiles README
+# Extension profiles for VSCode
 
-This is the README for your extension "vscode-extension-profiles". After writing up a brief description, we recommend including the following sections.
+Lets you create profiles to include the selected extensions in the desired project.
 
-## Features
+![Demo](https://github.com/evald24/vscode-extension-profiles/assets/vscode-extension-profiles.gif)
 
-Describe specific features of your extension including screenshots of your extension in action. Image paths are relative to this README file.
+<!-- https://user-images.githubusercontent.com/10986227/122539241-34165180-d049-11eb-8a35-dbd3402e991f.mp4 -->
 
-For example if there is an image subfolder under your extension project workspace:
+Do you often have to work with different projects and different technologies?
 
-\!\[feature X\]\(images/feature-x.png\)
+Quickly and conveniently create profiles with the necessary extensions for working with various technologies. For React, Vue, Angular, C / C++ and many others.
 
-> Tip: Many popular extensions utilize animations. This is an excellent way to show off your extension! We recommend short, focused animations that are easy to follow.
+![Select extensions](https://github.com/evald24/vscode-extension-profiles/assets/select-extensions.png)
 
-## Requirements
+Apply a profile to a folder or workspace with a single command!
 
-If you have any requirements or dependencies, add a section describing those and how to install and configure them.
+![Commands](https://github.com/evald24/vscode-extension-profiles/assets/commands.png)
 
-## Extension Settings
+## Further development
 
-Include if your extension adds any VS Code settings through the `contributes.configuration` extension point.
+Explanation: 💡 - pending, ⚙️ ️- in progress, ❌ - cancelled
 
-For example:
+My thoughts:
 
-This extension contributes the following settings:
+- 💡 Apply a profile to a set of selected workspaces;
+- 💡 Import selected profiles;
+- 💡 After installing new extensions, automatically add to the list of disabled extensions not specified in the profile;
+- Привяз Linking the project to the profile (auto update when the profile changes);
+- 💡 `ext-profiles.json` - local configuration file for projects and recommendations for installing missing extensions;
+- 💡 More convenient modification of plugins for a separate project without linking to a profile or creating it;
+- 💡 Create a profile from the current or selected project.
 
-- `myExtension.enable`: enable/disable this extension
-- `myExtension.thing`: set to `blah` to do something
-
-## Known Issues
-
-Calling out known issues can help limit users opening duplicate issues against your extension.
-
-## Release Notes
-
-Users appreciate release notes as you update your extension.
-
-### 1.0.0
-
-Initial release of ...
-
-### 1.0.1
-
-Fixed issue #.
-
-### 1.1.0
-
-Added features X, Y, and Z.
-
----
-
-## Following extension guidelines
-
-Ensure that you've read through the extensions guidelines and follow the best practices for creating your extension.
-
-- [Extension Guidelines](https://code.visualstudio.com/api/references/extension-guidelines)
-
-## Working with Markdown
-
-**Note:** You can author your README using Visual Studio Code. Here are some useful editor keyboard shortcuts:
-
-- Split the editor (`Cmd+\` on macOS or `Ctrl+\` on Windows and Linux)
-- Toggle preview (`Shift+CMD+V` on macOS or `Shift+Ctrl+V` on Windows and Linux)
-- Press `Ctrl+Space` (Windows, Linux) or `Cmd+Space` (macOS) to see a list of Markdown snippets
-
-### For more information
-
-- [Visual Studio Code's Markdown Support](http://code.visualstudio.com/docs/languages/markdown)
-- [Markdown Syntax Reference](https://help.github.com/articles/markdown-basics/)
-
-**Enjoy!**
+I invite you to discuss these thoughts and suggestions in this issue: [Do I need additional functionality?](https://github.com/evald24/vscode-extensions-profiles/issues/1)

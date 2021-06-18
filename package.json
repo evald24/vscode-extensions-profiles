@@ -1,7 +1,7 @@
 {
   "name": "vscode-extension-profiles",
   "displayName": "Extension profiles",
-  "version": "0.0.1",
+  "version": "1.0.0-rc.2",
   "private": false,
   "description": "Lets you create profiles to include the selected extensions in the desired project.",
   "categories": [
@@ -25,7 +25,8 @@
   "publisher": "evald24",
   "main": "./out/extension.js",
   "scripts": {
-    "compile": "tsc -p ./",
+    "compile": "rm -rf ./out && tsc -p ./",
+    "version": "auto-changelog -p && git add CHANGELOG.md",
     "lint": "eslint src --ext ts",
     "pretest": "yarn run compile && yarn run lint",
     "test": "node ./out/test/runTest.js",
@@ -35,79 +36,53 @@
   "contributes": {
     "commands": [
       {
-        "command": "vscode-extension-profiles.Select",
-        "title": "Extension profiles - Select profile"
+        "command": "vscode-extension-profiles.Apply",
+        "title": "Extension profiles: Select and apply profile",
+        "shortTitle": "Select and apply profile"
+      },
+      {
+        "command": "vscode-extension-profiles.Create",
+        "title": "Extension profiles: Create profile",
+        "shortTitle": "Create profile"
       },
       {
         "command": "vscode-extension-profiles.Edite",
-        "title": "Extension profiles - Edite profile"
+        "title": "Extension profiles: Edite profile",
+        "shortTitle": "Edite profile"
+      },
+      {
+        "command": "vscode-extension-profiles.Refresh",
+        "title": "Extension profiles: Refresh list of installed extensions",
+        "shortTitle": "Refresh list of installed extensions"
       },
       {
         "command": "vscode-extension-profiles.Delete",
-        "title": "Extension profiles - Delete profile"
+        "title": "Extension profiles: Delete profile",
+        "shortTitle": "Delete profile"
       }
-    ],
-    "configuration": {
-      "title": "Settings for the Extensions profiles",
-      "properties": {
-        "vscode-extension-profiles.list": {
-          "type": "object",
-          "default": {},
-          "description": "These are the settings for each saved profile.",
-          "patternProperties": {
-            ".*": {
-              "type": "array",
-              "description": "Profile",
-              "default": [],
-              "items": {
-                "type": "string",
-                "description": "Extension id",
-                "pattern": "[0-9a-z-]{1,}\\.[0-9a-z-]{1,}"
-              }
-            }
-          }
-        },
-        "vscode-extension-profiles.extensions": {
-          "type": "object",
-          "description": "All installed extensions.",
-          "default": {},
-          "patternProperties": {
-            "[0-9a-z-]{1,}\\.[0-9a-z-]{1,}": {
-              "type": "object",
-              "description": "Extension id",
-              "default": {
-                "uuid": "",
-                "label": ""
-              },
-              "properties": {
-                "uuid": {
-                  "type": "string",
-                  "pattern": "[0-9a-fA-F]{8}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{12}",
-                  "description": "Extension universally unique identifier"
-                },
-                "label": {
-                  "type": "string",
-                  "description": "Extension label"
-                }
-              }
-            }
-          }
-        }
-      }
-    }
+    ]
   },
   "activationEvents": [
-    "onCommand:vscode-extension-profiles.Select",
+    "onCommand:vscode-extension-profiles.Apply",
+    "onCommand:vscode-extension-profiles.Create",
     "onCommand:vscode-extension-profiles.Edite",
-    "onCommand:vscode-extension-profiles.Delete"
+    "onCommand:vscode-extension-profiles.Delete",
+    "onCommand:vscode-extension-profiles.Refresh",
+    "onStartupFinished"
   ],
+  "dependencies": {
+    "sqlite": "^4.0.23",
+    "sqlite3": "^5.0.2"
+  },
   "devDependencies": {
     "@types/glob": "^7.1.3",
     "@types/mocha": "^8.2.2",
     "@types/node": "14.x",
+    "@types/sqlite3": "^3.1.7",
     "@types/vscode": "^1.57.0",
     "@typescript-eslint/eslint-plugin": "^4.26.0",
     "@typescript-eslint/parser": "^4.26.0",
+    "auto-changelog": "^2.3.0",
     "eslint": "^7.27.0",
     "glob": "^7.1.7",
     "mocha": "^8.4.0",
