@@ -35,20 +35,39 @@ export function getExtensionsPath(): string {
   }
 }
 
-// Workspace storage
-export function getWorkspaceStoragePath(): string {
+// User workspace storage
+export function getUserWorkspaceStoragePath(): string {
   return `${getVSCodePath()}/User/workspaceStorage`;
 }
+// Workspaces
+export function getWorkspacesPath(): string {
+  return `${getVSCodePath()}/Workspaces`;
+}
 
-// Global storage
-export function getGlobalStoragePath(): string {
+// User global storage
+export function getUserGlobalStoragePath(): string {
   return `${getVSCodePath()}/User/globalStorage`;
 }
 
-export async function getWorkspaceUUID(uriWorkspace: vscode.Uri): Promise<string> {
-  let pathWorkspaceStorage = getWorkspaceStoragePath();
-  const files = await getFiles(pathWorkspaceStorage, "workspace.json");
-  const uuid = (await searchFolderWorkspace(files, uriWorkspace))[0]?.replace(pathWorkspaceStorage + "/", "").replace("/workspace.json", "");
+export async function getUserWorkspaceStorageUUID(uriWorkspace: vscode.Uri): Promise<string> {
+  let pathUserWorkspaceStorage = getUserWorkspaceStoragePath();
+
+  const files = await getFiles(pathUserWorkspaceStorage, "workspace.json");
+  const uuid = (await searchFolderUserWorkspaceStorage(files, uriWorkspace))[0]?.replace(pathUserWorkspaceStorage + "/", "").replace("/workspace.json", "");
+
+  return uuid!;
+}
+
+export async function getWorkspacesUUID(uriWorkspaces: vscode.Uri[]): Promise<string> {
+  let pathWorkspaces = getWorkspacesPath();
+  let pathUserWorkspaceStorage = getUserWorkspaceStoragePath();
+
+  const filesWorkspaces = await getFiles(pathWorkspaces, "workspace.json");
+  const absoluePath = vscode.Uri.parse((await searchFolderWorkspaces(filesWorkspaces, uriWorkspaces))[0]!);
+
+  const filesUserWorkspaceStorage = await getFiles(pathUserWorkspaceStorage, "workspace.json");
+  const uuid = (await searchFolderUserWorkspaceStorage(filesUserWorkspaceStorage, absoluePath))[0]?.replace(pathUserWorkspaceStorage + "/", "").replace("/workspace.json", "");
+
   return uuid!;
 }
 
@@ -68,14 +87,29 @@ async function getFiles(dir: string, pattern: string): Promise<string[]> {
   return files.reduce((a: any, f: any) => a.concat(f), []) as Promise<string[]>;
 }
 
-async function searchFolderWorkspace(files: string[], uriWorkspace: vscode.Uri) {
+async function searchFolderUserWorkspaceStorage(files: string[], uriWorkspace: vscode.Uri) {
   return await Promise.all(
     files.map(async (filePath) => {
-      const data: { folder: string } = require(filePath);
-      console.log({ data, uriWorkspace });
-      if (data.folder === fileUrl(uriWorkspace.path)) {
-        return filePath;
-      }
+      const {folder, workspace}: { folder?: string, workspace?: string } = require(filePath);
+      // eslint-disable-next-line curly
+      if (folder && folder === fileUrl(uriWorkspace.path)) return filePath;
+      // eslint-disable-next-line curly
+      if (workspace && workspace === fileUrl(uriWorkspace.path)) return filePath;
+    }),
+  ).then((allData) => allData.filter((x) => x !== undefined));
+}
+
+async function searchFolderWorkspaces(files: string[], uriFolders: vscode.Uri[]) {
+  let folders: string[] = uriFolders.map((item => item.fsPath));
+
+  return await Promise.all(
+    files.map(async (filePath) => {
+      const data: { folders: Array<{ path: string}> } = require(filePath);
+      let i = 0;
+      // eslint-disable-next-line curly
+      for (const { path: fsPath } of data.folders) if (folders.includes(fsPath)) i++;
+      // eslint-disable-next-line curly
+      if (i === folders.length) return filePath;
     }),
   ).then((allData) => allData.filter((x) => x !== undefined));
 }

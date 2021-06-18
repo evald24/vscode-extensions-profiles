@@ -45,8 +45,8 @@
         "shortTitle": "Create profile"
       },
       {
-        "command": "vscode-extension-profiles.CreateOrEdite",
-        "title": "Extension profiles: Create or edite profile",
+        "command": "vscode-extension-profiles.Edite",
+        "title": "Extension profiles: Edite profile",
         "shortTitle": "Edite profile"
       },
       {
