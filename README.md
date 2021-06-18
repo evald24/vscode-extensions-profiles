@@ -2,19 +2,19 @@
 
 Lets you create profiles to include the selected extensions in the desired project.
 
-![Demo](https://github.com/evald24/vscode-extension-profiles/assets/vscode-extension-profiles.gif)
+Do you often have to work with different projects and different technologies?
+
+![Demo](/assets/vscode-extension-profiles.gif)
 
 <!-- https://user-images.githubusercontent.com/10986227/122539241-34165180-d049-11eb-8a35-dbd3402e991f.mp4 -->
 
-Do you often have to work with different projects and different technologies?
+Quickly and conveniently create profiles with the necessary extensions for working with various technologies.
 
-Quickly and conveniently create profiles with the necessary extensions for working with various technologies. For React, Vue, Angular, C / C++ and many others.
-
-![Select extensions](https://github.com/evald24/vscode-extension-profiles/assets/select-extensions.png)
+![Select extensions](/assets/select-extensions.png)
 
 Apply a profile to a folder or workspace with a single command!
 
-![Commands](https://github.com/evald24/vscode-extension-profiles/assets/commands.png)
+![Commands](/assets/commands.png)
 
 ## Further development
 
