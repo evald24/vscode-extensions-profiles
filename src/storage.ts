@@ -5,7 +5,8 @@ import { ExtensionList, ExtensionValue, ProfileList, StorageKey, StorageValue } 
 import { getUserGlobalStoragePath, getUserWorkspaceStoragePath } from "./utils";
 
 
-export async function getDisabledExtensionsInGlobalStorage() {
+//
+export async function getDisabledExtensionsGlobalStorage() {
   const db = await open({
     filename: getUserGlobalStoragePath() + "/state.vscdb",
     driver: sqlite3.Database,
@@ -20,27 +21,8 @@ export async function getDisabledExtensionsInGlobalStorage() {
   return []; // default
 }
 
-export async function getAllExtensions() {
-  const disabled = await getDisabledExtensionsInGlobalStorage();
-  const enabled = getEnabledExtensions();
-
-  // https://github.com/microsoft/vscode/issues/15466
-  // vscode.extensions.getExtension not working disabled extensions
-  // for (const item of disabled) {
-  //   let ext = vscode.extensions.getExtension(item.id);
-  //   item.label = ext?.packageJSON.displayName || item.id;
-  // }
-
-  return [...disabled, ...enabled].sort((a: any, b: any) => {
-    // eslint-disable-next-line curly
-    if (a.label > b.label) return -1;
-    // eslint-disable-next-line curly
-    else if (a.label < b.label) return 1;
-    // eslint-disable-next-line curly
-    else return 0;
-  });
-}
-
+// VSCode hides disabled extensions
+// https://github.com/microsoft/vscode/issues/15466
 export function getEnabledExtensions() {
   return  vscode.extensions.all
     .filter((e) => /^(?!\/Applications\/Visual Studio Code.app\/).*$/g.test(e.extensionPath))
@@ -66,17 +48,6 @@ export async function getWorkspaceStorageValue(uuid: string, key: "enabled" | "d
 
   return []; // default
 }
-
-// setDisabledExtensionsInWorkspaceStorage
-// setEnabledExtensionsInWorkspaceStorage
-
-// // Проверять отключены ли плагины в GlobalStorage
-// // -- если да (есть в списке)
-// // Если указано, что нужно включать плагин, то помещать в extensionsIdentifiers/enabled
-// // Если указано, нет влючены то помещать в extensionsIdentifiers/disabled
-
-// Все отмеченые плагины помещать в extensionsIdentifiers/enabled
-// Все не отмеченые плагины помещать в extensionsIdentifiers/disabled
 
 export async function setWorkspaceStorageValue(uuid: string,  key: "enabled" | "disabled", extensions: ExtensionValue[]) {
   const db = await open({

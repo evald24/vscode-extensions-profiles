@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 
 import * as vscode from "vscode";
-import { getAllExtensions, setGlobalStorageValue, setWorkspaceStorageValue } from "./storage";
+import { setGlobalStorageValue, setWorkspaceStorageValue } from "./storage";
 import { ExtensionList, ExtensionValue } from "./types";
-import { getExtensionList, getProfileList, getUserWorkspaceStorageUUID, getWorkspacesUUID } from "./utils";
+import { getAllExtensions, getExtensionList, getProfileList, getUserWorkspaceStorageUUID, getWorkspacesUUID } from "./utils";
 export const CommandTypes = [
   "vscode-extension-profiles.Refresh",
   "vscode-extension-profiles.Create",
