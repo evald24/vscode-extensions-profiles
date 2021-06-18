@@ -60,55 +60,7 @@
         "title": "Extension profiles: Delete profile",
         "shortTitle": "Delete profile"
       }
-    ],
-    "configuration": {
-      "title": "Settings for the Extensions profiles",
-      "properties": {
-        "vscode-extension-profiles.list": {
-          "type": "object",
-          "default": {},
-          "description": "These are the settings for each saved profile.",
-          "patternProperties": {
-            ".*": {
-              "type": "array",
-              "description": "Profile",
-              "default": [],
-              "items": {
-                "type": "string",
-                "description": "Extension id",
-                "pattern": "[0-9a-z-]{1,}\\.[0-9a-z-]{1,}"
-              }
-            }
-          }
-        },
-        "vscode-extension-profiles.extensions": {
-          "type": "object",
-          "description": "All installed extensions.",
-          "default": {},
-          "patternProperties": {
-            "[0-9a-z-]{1,}\\.[0-9a-z-]{1,}": {
-              "type": "object",
-              "description": "Extension id",
-              "default": {
-                "uuid": "",
-                "label": ""
-              },
-              "properties": {
-                "uuid": {
-                  "type": "string",
-                  "pattern": "[0-9a-fA-F]{8}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{12}",
-                  "description": "Extension universally unique identifier"
-                },
-                "label": {
-                  "type": "string",
-                  "description": "Extension label"
-                }
-              }
-            }
-          }
-        }
-      }
-    }
+    ]
   },
   "activationEvents": [
     "onCommand:vscode-extension-profiles.Apply",
