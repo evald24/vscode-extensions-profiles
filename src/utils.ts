@@ -1,7 +1,7 @@
 import { promisify } from "util";
 import * as vscode from "vscode";
 import { getGlobalStorageValue } from "./storage";
-import { ExtensionList, ProfileList } from "./types";
+import { ExtensionList, ExtensionValue, PackageJson, ProfileList } from "./types";
 
 import path = require("path");
 import fs = require("fs");
@@ -142,4 +142,40 @@ export async function getProfileList() {
 
 export async function getExtensionList() {
   return await getGlobalStorageValue("vscodeExtensionProfiles/extensions") as ExtensionList;
+}
+
+export function loadJSON(path: string) {
+  return JSON.parse(fs.readFileSync(path) as any);
+}
+
+export async function getAllExtensions() {
+  const extPath = getExtensionsPath();
+  let extensions: ExtensionValue[] = [];
+  let obsolete = Object.keys(loadJSON(extPath + "/.obsolete" ));
+  console.log(obsolete);
+
+  let all = await readdir(extPath);
+
+  await Promise.all(
+    all.map(async (name) => {
+      if ((await stat(extPath + "/" + name)).isDirectory() && !obsolete.includes(name)) {
+        let info: PackageJson = require(extPath + "/" + name + "/package.json");
+        extensions.push({
+          id: `${info.publisher.toLowerCase()}.${info.name.toLowerCase()}`,
+          uuid: info.__metadata.id,
+          label: info.displayName || info.name,
+          description: info.description
+        });
+      }
+    })
+  );
+
+  return extensions.sort((a: any, b: any) => {
+    // eslint-disable-next-line curly
+    if (a.label > b.label) return -1;
+    // eslint-disable-next-line curly
+    else if (a.label < b.label) return 1;
+    // eslint-disable-next-line curly
+    else return 0;
+  });
 }
