@@ -5,7 +5,7 @@ import { CommandType } from "./types";
 
 export async function activate(ctx: vscode.ExtensionContext) {
   // Refreshing the list of extensions after startup
-  // refreshExtensionList({ isCache: true });
+  refreshExtensionList({ isCache: true });
 
   // Registration commands
   ctx.subscriptions.push(

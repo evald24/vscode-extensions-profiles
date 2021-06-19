@@ -33,12 +33,12 @@ export async function applyProfile() {
   if (!profileName) {
     return;
   }
+
   // Check and refresh extension list
   let extensions = await getExtensionList();
   if (Object.keys(extensions).length === 0) {
     extensions = await refreshExtensionList({ isCache: true });
   }
-  console.log({extensions})
 
   let enabledList: ExtensionValue[] = [];
   let disabledList: ExtensionValue[] = [];
@@ -54,7 +54,6 @@ export async function applyProfile() {
     }
   }
 
-  let fsPath = folders[0].uri.fsPath;
   let uuid = "";
   if (folders.length > 1) {
     let uriFolders: vscode.Uri[] = [];
@@ -63,15 +62,13 @@ export async function applyProfile() {
     }
     uuid = await getWorkspacesUUID(uriFolders);
   } else {
-    uuid = await getUserWorkspaceStorageUUID(vscode.Uri.parse(fsPath));
+    uuid = await getUserWorkspaceStorageUUID(folders[0].uri);
   }
-  console.log({uuid, fsPath})
 
   // write in workspace
   await setWorkspaceStorageValue(uuid, "enabled", enabledList);
   await setWorkspaceStorageValue(uuid, "disabled", disabledList);
 
-  console.log("reload")
   // Reloading the window to apply extensions
    vscode.commands.executeCommand("workbench.action.reloadWindow");
    return;
@@ -284,7 +281,7 @@ export async function refreshExtensionList({ isCache = false }) {
 
   await setGlobalStorageValue("vscodeExtensionProfiles/extensions", newExtensionList);
 
-  // if (!isCache)
-    vscode.window.showInformationMessage("Updated the list of installed extensions!");
+  if (!isCache) vscode.window.showInformationMessage("Updated the list of installed extensions!");
+
   return newExtensionList;
 }
