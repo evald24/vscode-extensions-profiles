@@ -4,26 +4,9 @@ import * as vscode from "vscode";
 import { setGlobalStorageValue, setWorkspaceStorageValue } from "./storage";
 import { ExtensionList, ExtensionValue } from "./types";
 import { getAllExtensions, getExtensionList, getProfileList, getUserWorkspaceStorageUUID, getWorkspacesUUID } from "./utils";
-export const CommandTypes = [
-  "vscode-extension-profiles.Refresh",
-  "vscode-extension-profiles.Create",
-  "vscode-extension-profiles.Edite",
-  "vscode-extension-profiles.Apply",
-  "vscode-extension-profiles.Delete",
-] as const;
-
-type Args = { ctx: vscode.ExtensionContext, isCache?: boolean};
-
-export const Commands: Record<typeof CommandTypes[number], (args: Args) => any> = {
-  "vscode-extension-profiles.Refresh": refreshExtensionList,
-  "vscode-extension-profiles.Create": createProfile,
-  "vscode-extension-profiles.Edite": editeProfile,
-  "vscode-extension-profiles.Apply": applyProfile,
-  "vscode-extension-profiles.Delete": deleteProfile,
-};
 
 // Select and apply profile ...
-async function applyProfile() {
+export async function applyProfile() {
 
   // Checking whether the workspace is open
   let folders = vscode.workspace.workspaceFolders;
@@ -50,12 +33,12 @@ async function applyProfile() {
   if (!profileName) {
     return;
   }
-
   // Check and refresh extension list
   let extensions = await getExtensionList();
   if (Object.keys(extensions).length === 0) {
     extensions = await refreshExtensionList({ isCache: true });
   }
+  console.log({extensions})
 
   let enabledList: ExtensionValue[] = [];
   let disabledList: ExtensionValue[] = [];
@@ -82,13 +65,16 @@ async function applyProfile() {
   } else {
     uuid = await getUserWorkspaceStorageUUID(vscode.Uri.parse(fsPath));
   }
+  console.log({uuid, fsPath})
 
   // write in workspace
   await setWorkspaceStorageValue(uuid, "enabled", enabledList);
   await setWorkspaceStorageValue(uuid, "disabled", disabledList);
 
+  console.log("reload")
   // Reloading the window to apply extensions
-  return vscode.commands.executeCommand("workbench.action.reloadWindow");
+   vscode.commands.executeCommand("workbench.action.reloadWindow");
+   return;
 }
 
 // Create profile ...
@@ -152,7 +138,7 @@ export async function createProfile() {
 }
 
 // Edite profile ...
-async function editeProfile() {
+export async function editeProfile() {
   // Get and check profiles
   const profiles = await getProfileList();
   if (Object.keys(profiles).length === 0) {
@@ -222,7 +208,7 @@ async function editeProfile() {
 }
 
 // Delete profile ...
-async function deleteProfile() {
+export async function deleteProfile() {
   // Get all profiles
   const profiles = await getProfileList();
   if (Object.keys(profiles).length === 0) {
@@ -298,6 +284,7 @@ export async function refreshExtensionList({ isCache = false }) {
 
   await setGlobalStorageValue("vscodeExtensionProfiles/extensions", newExtensionList);
 
-  vscode.window.showInformationMessage("Updated the list of installed extensions!");
+  // if (!isCache)
+    vscode.window.showInformationMessage("Updated the list of installed extensions!");
   return newExtensionList;
 }
