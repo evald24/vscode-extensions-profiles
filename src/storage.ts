@@ -5,10 +5,12 @@ import { ExtensionList, ExtensionValue, ProfileList, StorageKey, StorageValue } 
 import { getUserGlobalStoragePath, getUserWorkspaceStoragePath } from "./utils";
 
 
+const platform_slash = process.platform === "win32" ? "\\" : "/";
+
 //
 export async function getDisabledExtensionsGlobalStorage() {
   const db = await open({
-    filename: getUserGlobalStoragePath() + "/state.vscdb",
+    filename: getUserGlobalStoragePath() + platform_slash + "state.vscdb",
     driver: sqlite3.Database,
   });
 
@@ -25,7 +27,7 @@ export async function getDisabledExtensionsGlobalStorage() {
 // https://github.com/microsoft/vscode/issues/15466
 export function getEnabledExtensions() {
   return  vscode.extensions.all
-    .filter((e) => /^(?!\/Applications\/Visual Studio Code.app\/).*$/g.test(e.extensionPath))
+    .filter((e) =>  !/.*(?:\\\\|\/)resources(?:\\\\|\/)app(?:\\\\|\/)extensions(?:\\\\|\/).*/i.test(e.extensionPath)) // ignore internal extensions
     .map(item =>({
       id: item.id,
       uuid: item?.packageJSON.uuid,
@@ -36,7 +38,7 @@ export function getEnabledExtensions() {
 
 export async function getWorkspaceStorageValue(uuid: string, key: "enabled" | "disabled") {
   const db = await open({
-    filename: `${getUserWorkspaceStoragePath()}/${uuid}/state.vscdb`,
+    filename: `${getUserWorkspaceStoragePath()}${platform_slash}${uuid}${platform_slash}state.vscdb`,
     driver: sqlite3.Database,
   });
 
@@ -51,7 +53,7 @@ export async function getWorkspaceStorageValue(uuid: string, key: "enabled" | "d
 
 export async function setWorkspaceStorageValue(uuid: string,  key: "enabled" | "disabled", extensions: ExtensionValue[]) {
   const db = await open({
-    filename: `${getUserWorkspaceStoragePath()}/${uuid}/state.vscdb`,
+    filename: `${getUserWorkspaceStoragePath()}${platform_slash}${uuid}${platform_slash}state.vscdb`,
     driver: sqlite3.Database,
   });
 
@@ -61,7 +63,7 @@ export async function setWorkspaceStorageValue(uuid: string,  key: "enabled" | "
 
 export async function setGlobalStorageValue(key: StorageKey, value: ExtensionList | ProfileList) {
   const db = await open({
-    filename: getUserGlobalStoragePath() + "/state.vscdb",
+    filename: getUserGlobalStoragePath() + platform_slash + "state.vscdb",
     driver: sqlite3.Database,
   });
 
@@ -70,7 +72,7 @@ export async function setGlobalStorageValue(key: StorageKey, value: ExtensionLis
 
 export async function getGlobalStorageValue(key: StorageKey) : Promise<ExtensionList | ProfileList>{
   const db = await open({
-    filename: getUserGlobalStoragePath() + "/state.vscdb",
+    filename: getUserGlobalStoragePath() + platform_slash + "state.vscdb",
     driver: sqlite3.Database,
   });
 

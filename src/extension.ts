@@ -1,14 +1,20 @@
+"use strict";
 import * as vscode from "vscode";
-import { Commands, CommandTypes, refreshExtensionList } from "./commands";
+import { applyProfile, createProfile, deleteProfile, editeProfile, refreshExtensionList } from "./commands";
+import { CommandType } from "./types";
 
 export async function activate(ctx: vscode.ExtensionContext) {
   // Refreshing the list of extensions after startup
   refreshExtensionList({ isCache: true });
 
   // Registration commands
-  for (const key in Commands) {
-    ctx.subscriptions.push(vscode.commands.registerCommand(key, async () => Commands[key as typeof CommandTypes[number]]({ ctx })));
-  }
+  ctx.subscriptions.push(
+    vscode.commands.registerCommand("vscode-extension-profiles.Refresh" as CommandType, () => refreshExtensionList({})),
+    vscode.commands.registerCommand("vscode-extension-profiles.Create" as CommandType, createProfile),
+    vscode.commands.registerCommand("vscode-extension-profiles.Apply" as CommandType, applyProfile),
+    vscode.commands.registerCommand("vscode-extension-profiles.Edite" as CommandType, editeProfile),
+    vscode.commands.registerCommand("vscode-extension-profiles.Delete" as CommandType, deleteProfile),
+  );
 }
 
 export function deactivate() {}

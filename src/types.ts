@@ -1,6 +1,13 @@
 export type StorageValue = { key: string; value: string };
 export type ExtensionValue = { id: string; uuid: string; label?: string; description?: string };
 
+export type CommandType =
+  "vscode-extension-profiles.Refresh" |
+  "vscode-extension-profiles.Create" |
+  "vscode-extension-profiles.Edite" |
+  "vscode-extension-profiles.Apply" |
+  "vscode-extension-profiles.Delete";
+
 export type ProfileList = {
   [key: string]: ExtensionList;
 };
