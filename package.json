@@ -11,7 +11,9 @@
     "vscode-settings",
     "profile",
     "extensions",
-    "extension"
+    "extension",
+    "manager",
+    "workspace"
   ],
   "repository": {
     "type": "git",
