@@ -1,7 +1,7 @@
 {
   "name": "vscode-extension-profiles",
   "displayName": "Extension profiles",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "private": false,
   "description": "Lets you create profiles to include the selected extensions in the desired project.",
   "categories": [
