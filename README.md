@@ -25,7 +25,7 @@ My thoughts:
 - 💡 Apply a profile to a set of selected workspaces;
 - 💡 Import selected profiles;
 - 💡 After installing new extensions, automatically add to the list of disabled extensions not specified in the profile;
-- Привяз Linking the project to the profile (auto update when the profile changes);
+- 💡 Linking the project to the profile (auto update when the profile changes);
 - 💡 `ext-profiles.json` - local configuration file for projects and recommendations for installing missing extensions;
 - 💡 More convenient modification of plugins for a separate project without linking to a profile or creating it;
 - 💡 Create a profile from the current or selected project.
