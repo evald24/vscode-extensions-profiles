@@ -65,7 +65,6 @@ export async function getUserWorkspaceStorageUUID(uriWorkspace: vscode.Uri): Pro
 
   const files = await getFiles(pathUserWorkspaceStorage, "workspace.json");
   const fsPath = (await searchFolderUserWorkspaceStorage(files, uriWorkspace))[0]!;
-
   return fsPath.replace(pathUserWorkspaceStorage + platform_slash, "").replace(platform_slash + "workspace.json", "");
 }
 
@@ -74,11 +73,8 @@ export async function getWorkspacesUUID(uriWorkspaces: vscode.Uri[]): Promise<st
   let pathUserWorkspaceStorage = getUserWorkspaceStoragePath();
 
   const filesWorkspaces = await getFiles(pathWorkspaces, "workspace.json");
-  const absoluePath = vscode.Uri.parse((await searchFolderWorkspaces(filesWorkspaces, uriWorkspaces))[0]!);
-
   const filesUserWorkspaceStorage = await getFiles(pathUserWorkspaceStorage, "workspace.json");
-  const fsPath = (await searchFolderUserWorkspaceStorage(filesUserWorkspaceStorage, absoluePath))[0]!;
-
+  const fsPath = (await searchWorkspaces([...filesWorkspaces, ...filesUserWorkspaceStorage], uriWorkspaces))[0]!;
   return fsPath.replace(pathUserWorkspaceStorage + platform_slash, "").replace(platform_slash + "workspace.json", "");
 }
 
@@ -89,7 +85,7 @@ async function getFiles(dir: string, pattern: string): Promise<string[]> {
     subdirs.map(async (subdir: string) => {
       const res = path.resolve(dir, subdir);
       // eslint-disable-next-line curly
-      if ((await stat(res)).isDirectory()) return getFiles(res, pattern);
+      if ((await stat(res)).isDirectory()) return await getFiles(res, pattern);
       // eslint-disable-next-line curly
       else if (res.substr(-1 * pattern.length) === pattern) return res;
       return undefined;
@@ -101,34 +97,67 @@ async function getFiles(dir: string, pattern: string): Promise<string[]> {
 async function searchFolderUserWorkspaceStorage(files: string[], uriWorkspace: vscode.Uri) {
   return await Promise.all(
     files.map(async (filePath: string) => {
-      let { folder, workspace }: { folder?: string; workspace?: string } = require(filePath);
-      if (process.platform === "win32") {
-        // eslint-disable-next-line curly
-        if (folder && folder.replace("%3A", ":").toLocaleLowerCase() === fileUrl(uriWorkspace).toLocaleLowerCase()) return filePath;
-        // eslint-disable-next-line curly
-        if (workspace && workspace.replace("%3A", ":").toLocaleLowerCase() === fileUrl(uriWorkspace).toLocaleLowerCase()) return filePath;
-      } else {
-        // eslint-disable-next-line curly
-        if (folder && folder === fileUrl(uriWorkspace)) return filePath;
-        // eslint-disable-next-line curly
-        if (workspace && workspace === fileUrl(uriWorkspace)) return filePath;
+      try {
+        if (!fs.existsSync(filePath)) return undefined;
+
+        let { folder, workspace }: { folder?: string; workspace?: string } = loadJSON(filePath);
+        if (process.platform === "win32") {
+          // eslint-disable-next-line curly
+          if (folder && folder.replace("%3A", ":").toLocaleLowerCase() === fileUrl(uriWorkspace).toLocaleLowerCase()) return filePath;
+          // eslint-disable-next-line curly
+          if (workspace && workspace.replace("%3A", ":").toLocaleLowerCase() === fileUrl(uriWorkspace).toLocaleLowerCase()) return filePath;
+        } else {
+          // eslint-disable-next-line curly
+          if (folder && folder === fileUrl(uriWorkspace)) return filePath;
+          // eslint-disable-next-line curly
+          if (workspace && workspace === fileUrl(uriWorkspace)) return filePath;
+        }
+      } catch (e) {
+        console.error(e);
       }
       return undefined;
     }),
   ).then((allData) => allData.filter((x) => x !== undefined));
 }
 
-async function searchFolderWorkspaces(files: string[], uriFolders: vscode.Uri[]) {
+async function searchWorkspaces(files: string[], uriFolders: vscode.Uri[]) {
   let folders: string[] = uriFolders.map((item) => (process.platform === "win32" ? item.fsPath.toLocaleLowerCase() : item.fsPath));
 
   return await Promise.all(
     files.map(async (filePath: string) => {
-      const data: { folders: Array<{ path: string }> } = require(filePath);
-      let i = 0;
-      // eslint-disable-next-line curly
-      for (const { path: fsPath } of data.folders) if (folders.includes(process.platform === "win32" ? fsPath.toLocaleLowerCase() : fsPath)) i++;
-      // eslint-disable-next-line curly
-      if (i === folders.length) return filePath;
+      try {
+        if (!fs.existsSync(filePath)) return undefined;
+
+        let data: { folders?: Array<{ path: string }>; workspace?: string } = loadJSON(filePath);
+
+        if (typeof data.workspace !== "undefined") {
+          let fsPathWorkspace = vscode.Uri.parse(path.resolve(data.workspace.replace("file://", ""))).fsPath;
+
+          // eslint-disable-next-line curly
+          if (process.platform === "win32") fsPathWorkspace = fsPathWorkspace.slice(1, fsPathWorkspace.length);
+
+          // eslint-disable-next-line curly
+          if (!fs.existsSync(fsPathWorkspace)) return undefined;
+
+          data = loadJSON(fsPathWorkspace);
+          for (const item of data.folders!) {
+            item.path = path.join(path.dirname(fsPathWorkspace), item.path);
+          }
+        }
+
+        if (typeof data.folders !== "undefined") {
+          let i = 0;
+          for (const { path: relativePath } of data.folders) {
+            // eslint-disable-next-line curly
+            const fsPath = path.resolve(relativePath);
+            if (folders.includes(process.platform === "win32" ? fsPath.toLocaleLowerCase() : fsPath)) i++;
+          }
+          // eslint-disable-next-line curly
+          if (i === folders.length) return filePath;
+        }
+      } catch (e) {
+        console.error(e);
+      }
       return undefined;
     }),
   ).then((allData) => allData.filter((x) => x !== undefined));
