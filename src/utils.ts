@@ -197,7 +197,9 @@ export function loadJSON(path: string) {
 export async function getAllExtensions() {
   const extPath = getExtensionsPath();
   let extensions: ExtensionValue[] = [];
-  let obsolete = Object.keys(loadJSON(extPath + ".obsolete"));
+  let obsolete: string[] = []; // default value
+
+  if (fs.existsSync(extPath + ".obsolete")) obsolete = Object.keys(loadJSON(extPath + ".obsolete"));
 
   let all = await readdir(extPath);
 
