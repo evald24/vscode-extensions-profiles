@@ -206,7 +206,7 @@ export async function getAllExtensions() {
   await Promise.all(
     all.map(async (name) => {
       if ((await stat(extPath + platform_slash + name)).isDirectory() && !obsolete.includes(name)) {
-        let info: PackageJson = require(extPath + platform_slash + name + platform_slash + "package.json");
+        let info: PackageJson = require(extPath + name + platform_slash + "package.json");
         extensions.push({
           id: `${info.publisher.toLowerCase()}.${info.name.toLowerCase()}`,
           uuid: info.__metadata.id,
