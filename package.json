@@ -54,9 +54,9 @@
         "shortTitle": "Create profile"
       },
       {
-        "command": "vscode-extension-profiles.Edite",
-        "title": "Extension profiles: Edite profile",
-        "shortTitle": "Edite profile"
+        "command": "vscode-extension-profiles.Edit",
+        "title": "Extension profiles: Edit profile",
+        "shortTitle": "Edit profile"
       },
       {
         "command": "vscode-extension-profiles.Refresh",
@@ -73,7 +73,7 @@
   "activationEvents": [
     "onCommand:vscode-extension-profiles.Apply",
     "onCommand:vscode-extension-profiles.Create",
-    "onCommand:vscode-extension-profiles.Edite",
+    "onCommand:vscode-extension-profiles.Edit",
     "onCommand:vscode-extension-profiles.Delete",
     "onCommand:vscode-extension-profiles.Refresh",
     "onStartupFinished"

@@ -4,7 +4,7 @@ export type ExtensionValue = { id: string; uuid: string; label?: string; descrip
 export type CommandType =
   "vscode-extension-profiles.Refresh" |
   "vscode-extension-profiles.Create" |
-  "vscode-extension-profiles.Edite" |
+  "vscode-extension-profiles.Edit" |
   "vscode-extension-profiles.Apply" |
   "vscode-extension-profiles.Delete";
 
@@ -21,16 +21,16 @@ export type ExtensionList = {
 };
 
 export type PackageJson = {
-	"name": string,
-	"displayName": string,
+  "name": string,
+  "displayName": string,
   "description": string,
   "version": string,
   "publisher": string,
   // eslint-disable-next-line @typescript-eslint/naming-convention
   "__metadata": {
-		"id": string,
-		"publisherId": string,
-		"publisherDisplayName": string,
+    "id": string,
+    "publisherId": string,
+    "publisherDisplayName": string,
     "installedTimestamp": number
   },
   [key: string]: any
