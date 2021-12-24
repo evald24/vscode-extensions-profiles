@@ -1,6 +1,6 @@
 "use strict";
 import * as vscode from "vscode";
-import { applyProfile, createProfile, deleteProfile, editeProfile, refreshExtensionList } from "./commands";
+import { applyProfile, createProfile, deleteProfile, editProfile, refreshExtensionList } from "./commands";
 import { CommandType } from "./types";
 
 export async function activate(ctx: vscode.ExtensionContext) {
@@ -12,9 +12,9 @@ export async function activate(ctx: vscode.ExtensionContext) {
     vscode.commands.registerCommand("vscode-extension-profiles.Refresh" as CommandType, () => refreshExtensionList({})),
     vscode.commands.registerCommand("vscode-extension-profiles.Create" as CommandType, createProfile),
     vscode.commands.registerCommand("vscode-extension-profiles.Apply" as CommandType, applyProfile),
-    vscode.commands.registerCommand("vscode-extension-profiles.Edite" as CommandType, editeProfile),
+    vscode.commands.registerCommand("vscode-extension-profiles.Edit" as CommandType, editProfile),
     vscode.commands.registerCommand("vscode-extension-profiles.Delete" as CommandType, deleteProfile),
   );
 }
 
-export function deactivate() {}
+export function deactivate() { }

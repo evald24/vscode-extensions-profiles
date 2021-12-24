@@ -29,7 +29,7 @@ export async function applyProfile() {
   }
 
   // Selected profile
-  let profileName = (await vscode.window.showQuickPick(itemsProfiles, { placeHolder: "Search" , title:"Select a profile"}))?.label;
+  let profileName = (await vscode.window.showQuickPick(itemsProfiles, { placeHolder: "Search", title: "Select a profile" }))?.label;
   if (!profileName) {
     return;
   }
@@ -70,8 +70,8 @@ export async function applyProfile() {
   await setWorkspaceStorageValue(uuid, "disabled", disabledList);
 
   // Reloading the window to apply extensions
-   vscode.commands.executeCommand("workbench.action.reloadWindow");
-   return;
+  vscode.commands.executeCommand("workbench.action.reloadWindow");
+  return;
 }
 
 // Create profile ...
@@ -134,8 +134,8 @@ export async function createProfile() {
   return vscode.window.showInformationMessage(`Profile "${profileName}" successfully created!`);
 }
 
-// Edite profile ...
-export async function editeProfile() {
+// Edit profile ...
+export async function editProfile() {
   // Get and check profiles
   const profiles = await getProfileList();
   if (Object.keys(profiles).length === 0) {
@@ -152,7 +152,7 @@ export async function editeProfile() {
   }
 
   // Selected profile
-  let profileName = (await vscode.window.showQuickPick(itemsProfiles, { placeHolder: "Search" , title:"Select a profile to edit"}))?.label;
+  let profileName = (await vscode.window.showQuickPick(itemsProfiles, { placeHolder: "Search", title: "Select a profile to edit" }))?.label;
   if (!profileName) {
     return;
   }
@@ -222,7 +222,7 @@ export async function deleteProfile() {
   }
 
   // Selected profile
-  let profileName = (await vscode.window.showQuickPick(itemsProfiles, { placeHolder: "Search" , title:"Select a profile to edit"}))?.label;
+  let profileName = (await vscode.window.showQuickPick(itemsProfiles, { placeHolder: "Search", title: "Select a profile to edit" }))?.label;
   if (!profileName) {
     return;
   }
