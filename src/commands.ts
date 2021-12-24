@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 
-import { writeFile } from "fs/promises";
-import path = require("path");
+import { readFile, writeFile } from "fs/promises";
 import * as vscode from "vscode";
 import { setGlobalStorageValue, setWorkspaceStorageValue } from "./storage";
 import { ExtensionList, ExtensionValue } from "./types";
@@ -264,6 +263,38 @@ export async function exportProfile() {
   if (!resource) return;
   await writeFile(resource?.fsPath, JSON.stringify(profiles[profileName], null, '    '));
   return vscode.window.showInformationMessage(`Profile "${profileName}" successfully exported!`);
+}
+
+
+// Import a profile...
+export async function importProfile() {
+  const profiles = await getProfileList();
+
+  // Use showSaveDialog to get a path to the profile
+  const resource = await vscode.window.showOpenDialog({
+    title: 'Select a profile to import.',
+    openLabel: 'Import',
+    canSelectMany: false,
+    defaultUri: pathToDocuments()
+  });
+
+  if (!resource) return;
+  const profileName = resource[0].path.split('/').pop()?.slice(0, -5);
+  if (!profileName) return;
+
+  // Get extension list of cache
+  let extensions = await getExtensionList();
+
+  // update if not exist
+  if (Object.keys(extensions).length === 0)
+    extensions = await refreshExtensionList({ isCache: true });
+
+  // Add the imported profile
+  profiles[profileName] = JSON.parse((await readFile(resource[0].fsPath)).toString());
+
+  await setGlobalStorageValue("vscodeExtensionProfiles/profiles", profiles);
+
+  return vscode.window.showInformationMessage(`Profile "${profileName}" successfully imported!`);
 }
 
 

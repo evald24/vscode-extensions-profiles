@@ -72,6 +72,11 @@
         "command": "vscode-extension-profiles.Export",
         "title": "Extension profiles: Export profile",
         "shortTitle": "Export profile"
+      },
+      {
+        "command": "vscode-extension-profiles.Import",
+        "title": "Extension profiles: Import profile",
+        "shortTitle": "Import profile"
       }
     ]
   },

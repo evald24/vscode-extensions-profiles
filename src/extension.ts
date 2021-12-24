@@ -1,6 +1,6 @@
 "use strict";
 import * as vscode from "vscode";
-import { applyProfile, createProfile, deleteProfile, editProfile, exportProfile, refreshExtensionList } from "./commands";
+import { applyProfile, createProfile, deleteProfile, editProfile, exportProfile, importProfile, refreshExtensionList } from "./commands";
 import { CommandType } from "./types";
 
 export async function activate(ctx: vscode.ExtensionContext) {
@@ -15,6 +15,7 @@ export async function activate(ctx: vscode.ExtensionContext) {
     vscode.commands.registerCommand("vscode-extension-profiles.Edit" as CommandType, editProfile),
     vscode.commands.registerCommand("vscode-extension-profiles.Delete" as CommandType, deleteProfile),
     vscode.commands.registerCommand("vscode-extension-profiles.Export" as CommandType, exportProfile),
+    vscode.commands.registerCommand("vscode-extension-profiles.Import" as CommandType, importProfile),
   );
 }
 
