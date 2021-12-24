@@ -1,5 +1,7 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 
+import { writeFile } from "fs/promises";
+import path = require("path");
 import * as vscode from "vscode";
 import { setGlobalStorageValue, setWorkspaceStorageValue } from "./storage";
 import { ExtensionList, ExtensionValue } from "./types";
@@ -233,6 +235,38 @@ export async function deleteProfile() {
   return vscode.window.showInformationMessage(`Profile "${profileName}" successfully deleted!`);
 }
 
+// Export a profile...
+export async function exportProfile() {
+  // Get all profiles
+  const profiles = await getProfileList();
+  if (Object.keys(profiles).length === 0) {
+    return vscode.window.showInformationMessage("All right, no profiles to export! 😌");
+  }
+  // Generate items
+  let itemsProfiles: vscode.QuickPickItem[] = [];
+  for (const item in profiles) {
+    itemsProfiles.push({
+      label: item,
+    });
+  }
+
+  // Selected profile
+  let profileName = (await vscode.window.showQuickPick(itemsProfiles, { placeHolder: "Search", title: "Select a profile to export" }))?.label;
+  if (!profileName) {
+    return;
+  }
+
+  const resource = await vscode.window.showSaveDialog({
+    title: 'Select a place and file name to save the exported profile.',
+    saveLabel: 'Export',
+    defaultUri: pathToDocuments(profileName) // Desided to export all extentions to a default 'Documents' folder
+  });
+  if (!resource) { return; }
+  await writeFile(resource?.fsPath, JSON.stringify(profiles[profileName], null, '    '));
+  return vscode.window.showInformationMessage(`Profile "${profileName}" successfully exported!`);
+}
+
+
 export async function refreshExtensionList({ isCache = false }) {
   let oldExtensionList = await getExtensionList();
   let newExtensionList: ExtensionList = {};
@@ -281,7 +315,18 @@ export async function refreshExtensionList({ isCache = false }) {
 
   await setGlobalStorageValue("vscodeExtensionProfiles/extensions", newExtensionList);
 
-  if (!isCache) vscode.window.showInformationMessage("Updated the list of installed extensions!");
+  if (!isCache) { vscode.window.showInformationMessage("Updated the list of installed extensions!"); }
 
   return newExtensionList;
+}
+
+function pathToDocuments(profileName: string): vscode.Uri {
+  let basePath = "";
+  switch (process.platform) {
+    case 'linux':
+      basePath = process.cwd().split('/').slice(1, 3).join('/');
+      break;
+  }
+
+  return vscode.Uri.file(`${basePath}/Documents/${profileName}.json`);
 }
