@@ -219,7 +219,7 @@ export async function getAllExtensions() {
           let info: PackageJson = require(packageJsonPath);
           extensions.push({
             id: `${info.publisher.toLowerCase()}.${info.name.toLowerCase()}`,
-            uuid: info.__metadata.id,
+            uuid: info.__metadata?.id,
             label: info.displayName || info.name,
             description: info.description,
           });
