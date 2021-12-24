@@ -140,9 +140,9 @@ async function searchWorkspaces(files: string[], uriFolders: vscode.Uri[]) {
           if (!fs.existsSync(fsPathWorkspace)) return undefined;
 
           data = loadJSON(fsPathWorkspace);
-          for (const item of data.folders!) {
+          for (const item of data.folders!)
             item.path = path.join(path.dirname(fsPathWorkspace), item.path);
-          }
+
         }
 
         if (typeof data.folders !== "undefined") {
@@ -166,16 +166,16 @@ async function searchWorkspaces(files: string[], uriFolders: vscode.Uri[]) {
 export function fileUrl(filePath: vscode.Uri, options: any = { resolve: true }) {
   let pathName = filePath.fsPath;
 
-  if (options.resolve) {
+  if (options.resolve)
     pathName = path.resolve(filePath.fsPath);
-  }
+
 
   pathName = pathName.replace(/\\/g, "/");
 
   // Windows drive letter must be prefixed with a slash.
-  if (pathName[0] !== "/") {
+  if (pathName[0] !== "/")
     pathName = `/${pathName}`;
-  }
+
 
   // Escape required characters for path components.
   // See: https://tools.ietf.org/html/rfc3986#section-3.3
