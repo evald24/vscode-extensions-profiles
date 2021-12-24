@@ -17,4 +17,4 @@ export async function activate(ctx: vscode.ExtensionContext) {
   );
 }
 
-export function deactivate() { }
+export function deactivate() {}

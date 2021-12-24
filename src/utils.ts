@@ -8,7 +8,7 @@ import fs = require("fs");
 const readdir = promisify(fs.readdir);
 const stat = promisify(fs.stat);
 
-const platform_slash = process.platform === "win32" ? "\\" : "/";
+const platformSlash = process.platform === "win32" ? "\\" : "/";
 
 // VSCode path in different OS
 // https://code.visualstudio.com/docs/setup/setup-overview#_how-can-i-do-a-clean-uninstall-of-vs-code
@@ -65,7 +65,7 @@ export async function getUserWorkspaceStorageUUID(uriWorkspace: vscode.Uri): Pro
 
   const files = await getFiles(pathUserWorkspaceStorage, "workspace.json");
   const fsPath = (await searchFolderUserWorkspaceStorage(files, uriWorkspace))[0]!;
-  return fsPath.replace(pathUserWorkspaceStorage + platform_slash, "").replace(platform_slash + "workspace.json", "");
+  return fsPath.replace(pathUserWorkspaceStorage + platformSlash, "").replace(platformSlash + "workspace.json", "");
 }
 
 export async function getWorkspacesUUID(uriWorkspaces: vscode.Uri[]): Promise<string> {
@@ -75,7 +75,7 @@ export async function getWorkspacesUUID(uriWorkspaces: vscode.Uri[]): Promise<st
   const filesWorkspaces = await getFiles(pathWorkspaces, "workspace.json");
   const filesUserWorkspaceStorage = await getFiles(pathUserWorkspaceStorage, "workspace.json");
   const fsPath = (await searchWorkspaces([...filesWorkspaces, ...filesUserWorkspaceStorage], uriWorkspaces))[0]!;
-  return fsPath.replace(pathUserWorkspaceStorage + platform_slash, "").replace(platform_slash + "workspace.json", "");
+  return fsPath.replace(pathUserWorkspaceStorage + platformSlash, "").replace(platformSlash + "workspace.json", "");
 }
 
 // Recursive search for files in a directory with pattern
@@ -98,7 +98,9 @@ async function searchFolderUserWorkspaceStorage(files: string[], uriWorkspace: v
   return await Promise.all(
     files.map(async (filePath: string) => {
       try {
-        if (!fs.existsSync(filePath)) return undefined;
+        if (!fs.existsSync(filePath)) {
+          return undefined;
+        }
 
         let { folder, workspace }: { folder?: string; workspace?: string } = loadJSON(filePath);
         if (process.platform === "win32") {
@@ -126,7 +128,9 @@ async function searchWorkspaces(files: string[], uriFolders: vscode.Uri[]) {
   return await Promise.all(
     files.map(async (filePath: string) => {
       try {
-        if (!fs.existsSync(filePath)) return undefined;
+        if (!fs.existsSync(filePath)) {
+          return undefined;
+        }
 
         let data: { folders?: Array<{ path: string }>; workspace?: string } = loadJSON(filePath);
 
@@ -150,7 +154,9 @@ async function searchWorkspaces(files: string[], uriFolders: vscode.Uri[]) {
           for (const { path: relativePath } of data.folders) {
             // eslint-disable-next-line curly
             const fsPath = path.resolve(relativePath);
-            if (folders.includes(process.platform === "win32" ? fsPath.toLocaleLowerCase() : fsPath)) i++;
+            if (folders.includes(process.platform === "win32" ? fsPath.toLocaleLowerCase() : fsPath)) {
+              i++;
+            }
           }
           // eslint-disable-next-line curly
           if (i === folders.length) return filePath;
@@ -199,20 +205,28 @@ export async function getAllExtensions() {
   let extensions: ExtensionValue[] = [];
   let obsolete: string[] = []; // default value
 
-  if (fs.existsSync(extPath + ".obsolete")) obsolete = Object.keys(loadJSON(extPath + ".obsolete"));
+  if (fs.existsSync(extPath + ".obsolete")) {
+    obsolete = Object.keys(loadJSON(extPath + ".obsolete"));
+  }
 
   let all = await readdir(extPath);
 
   await Promise.all(
     all.map(async (name) => {
-      if ((await stat(extPath + platform_slash + name)).isDirectory() && !obsolete.includes(name)) {
-        let info: PackageJson = require(extPath + platform_slash + name + platform_slash + "package.json");
-        extensions.push({
-          id: `${info.publisher.toLowerCase()}.${info.name.toLowerCase()}`,
-          uuid: info.__metadata.id,
-          label: info.displayName || info.name,
-          description: info.description,
-        });
+      if ((await stat(extPath + name)).isDirectory() && !obsolete.includes(name)) {
+        const packageJsonPath = extPath + name + platformSlash + "package.json";
+        try {
+          let info: PackageJson = require(packageJsonPath);
+          extensions.push({
+            id: `${info.publisher.toLowerCase()}.${info.name.toLowerCase()}`,
+            uuid: info.__metadata.id,
+            label: info.displayName || info.name,
+            description: info.description,
+          });
+        } catch (e) {
+          vscode.window.showWarningMessage(`Could not get information from "${packageJsonPath}"`);
+          console.error(e);
+        }
       }
     }),
   );

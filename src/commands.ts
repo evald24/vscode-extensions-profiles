@@ -281,7 +281,9 @@ export async function refreshExtensionList({ isCache = false }) {
 
   await setGlobalStorageValue("vscodeExtensionProfiles/extensions", newExtensionList);
 
-  if (!isCache) vscode.window.showInformationMessage("Updated the list of installed extensions!");
+  if (!isCache) {
+    vscode.window.showInformationMessage("Updated the list of installed extensions!");
+  }
 
   return newExtensionList;
 }
