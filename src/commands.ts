@@ -256,12 +256,13 @@ export async function exportProfile() {
 
 
   const resource = await vscode.window.showSaveDialog({
-    title: 'Select a place and file name to save the exported profile.',
+    title: 'Select a place and file name to save the exported profile',
     saveLabel: 'Export',
     defaultUri: pathToDocuments(profileName) // Desided to export all extentions to a default 'Documents' folder
   });
-  if (!resource) return;
-  await writeFile(resource?.fsPath, JSON.stringify(profiles[profileName], null, '    '));
+  if (!resource)
+    return vscode.window.showErrorMessage(`Couldn't locate the path to exported profile! Try again`);
+  await writeFile(resource.fsPath, JSON.stringify(profiles[profileName], null, '    '));
   return vscode.window.showInformationMessage(`Profile "${profileName}" successfully exported!`);
 }
 
@@ -272,15 +273,17 @@ export async function importProfile() {
 
   // Use showSaveDialog to get a path to the profile
   const resource = await vscode.window.showOpenDialog({
-    title: 'Select a profile to import.',
+    title: 'Select a profile to import',
     openLabel: 'Import',
     canSelectMany: false,
     defaultUri: pathToDocuments()
   });
 
-  if (!resource) return;
+  if (!resource)
+    return vscode.window.showErrorMessage(`Couldn't locate the path to exported profile! Try again`);
   const profileName = resource[0].path.split('/').pop()?.slice(0, -5);
-  if (!profileName) return;
+  if (!profileName)
+    return vscode.window.showErrorMessage(`Couldn't resolve the name of the profile! Rename it and try again`);
 
   // Get extension list of cache
   let extensions = await getExtensionList();
@@ -346,9 +349,9 @@ export async function refreshExtensionList({ isCache = false }) {
 
   await setGlobalStorageValue("vscodeExtensionProfiles/extensions", newExtensionList);
 
-  if (!isCache) {
+  if (!isCache)
     vscode.window.showInformationMessage("Updated the list of installed extensions!");
-  }
+
 
   return newExtensionList;
 }
@@ -357,7 +360,11 @@ function pathToDocuments(profileName?: string): vscode.Uri {
   let basePath = "";
   switch (process.platform) {
     case 'linux':
+    case 'darwin':
       basePath = process.cwd().split('/').slice(1, 3).join('/');
+      break;
+    case 'win32':
+      // Windows users please add 
       break;
   }
 
