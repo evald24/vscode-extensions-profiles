@@ -98,9 +98,9 @@ async function searchFolderUserWorkspaceStorage(files: string[], uriWorkspace: v
   return await Promise.all(
     files.map(async (filePath: string) => {
       try {
-        if (!fs.existsSync(filePath)) {
+        if (!fs.existsSync(filePath))
           return undefined;
-        }
+
 
         let { folder, workspace }: { folder?: string; workspace?: string } = loadJSON(filePath);
         if (process.platform === "win32") {
@@ -128,9 +128,9 @@ async function searchWorkspaces(files: string[], uriFolders: vscode.Uri[]) {
   return await Promise.all(
     files.map(async (filePath: string) => {
       try {
-        if (!fs.existsSync(filePath)) {
+        if (!fs.existsSync(filePath))
           return undefined;
-        }
+
 
         let data: { folders?: Array<{ path: string }>; workspace?: string } = loadJSON(filePath);
 
@@ -144,9 +144,9 @@ async function searchWorkspaces(files: string[], uriFolders: vscode.Uri[]) {
           if (!fs.existsSync(fsPathWorkspace)) return undefined;
 
           data = loadJSON(fsPathWorkspace);
-          for (const item of data.folders!) {
+          for (const item of data.folders!)
             item.path = path.join(path.dirname(fsPathWorkspace), item.path);
-          }
+
         }
 
         if (typeof data.folders !== "undefined") {
@@ -154,9 +154,9 @@ async function searchWorkspaces(files: string[], uriFolders: vscode.Uri[]) {
           for (const { path: relativePath } of data.folders) {
             // eslint-disable-next-line curly
             const fsPath = path.resolve(relativePath);
-            if (folders.includes(process.platform === "win32" ? fsPath.toLocaleLowerCase() : fsPath)) {
+            if (folders.includes(process.platform === "win32" ? fsPath.toLocaleLowerCase() : fsPath))
               i++;
-            }
+
           }
           // eslint-disable-next-line curly
           if (i === folders.length) return filePath;
@@ -172,16 +172,16 @@ async function searchWorkspaces(files: string[], uriFolders: vscode.Uri[]) {
 export function fileUrl(filePath: vscode.Uri, options: any = { resolve: true }) {
   let pathName = filePath.fsPath;
 
-  if (options.resolve) {
+  if (options.resolve)
     pathName = path.resolve(filePath.fsPath);
-  }
+
 
   pathName = pathName.replace(/\\/g, "/");
 
   // Windows drive letter must be prefixed with a slash.
-  if (pathName[0] !== "/") {
+  if (pathName[0] !== "/")
     pathName = `/${pathName}`;
-  }
+
 
   // Escape required characters for path components.
   // See: https://tools.ietf.org/html/rfc3986#section-3.3
@@ -205,28 +205,22 @@ export async function getAllExtensions() {
   let extensions: ExtensionValue[] = [];
   let obsolete: string[] = []; // default value
 
-  if (fs.existsSync(extPath + ".obsolete")) {
+  if (fs.existsSync(extPath + ".obsolete"))
     obsolete = Object.keys(loadJSON(extPath + ".obsolete"));
-  }
+
 
   let all = await readdir(extPath);
 
   await Promise.all(
     all.map(async (name) => {
-      if ((await stat(extPath + name)).isDirectory() && !obsolete.includes(name)) {
-        const packageJsonPath = extPath + name + platformSlash + "package.json";
-        try {
-          let info: PackageJson = require(packageJsonPath);
-          extensions.push({
-            id: `${info.publisher.toLowerCase()}.${info.name.toLowerCase()}`,
-            uuid: info.__metadata?.id,
-            label: info.displayName || info.name,
-            description: info.description,
-          });
-        } catch (e) {
-          vscode.window.showWarningMessage(`Could not get information from "${packageJsonPath}"`);
-          console.error(e);
-        }
+      if ((await stat(extPath + platformSlash + name)).isDirectory() && !obsolete.includes(name)) {
+        let info: PackageJson = require(extPath + name + platformSlash + "package.json");
+        extensions.push({
+          id: `${info.publisher.toLowerCase()}.${info.name.toLowerCase()}`,
+          uuid: info.__metadata.id,
+          label: info.displayName || info.name,
+          description: info.description,
+        });
       }
     }),
   );
