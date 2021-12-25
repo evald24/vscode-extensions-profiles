@@ -356,7 +356,16 @@ export async function refreshExtensionList({ isCache = false }) {
   return newExtensionList;
 }
 
+// Return a path to a profile export file that will be in a 'Documents' folder or just the 'Documents'
 function pathToDocuments(profileName?: string): vscode.Uri {
+  /*
+   Since 'Documents' folder path changes from system to system 
+   I've defined a `basePath` variable to store a path to the 
+   user's folder. After that I just get the `cwd` path and change 
+   it based on user's OS. I then append the '/Documents/' and the 
+   file name if needed. 'Uri.file' takes '/' as path separators 
+   to create a URI so take that in considation when you work with this
+  */
   let basePath = "";
   switch (process.platform) {
     case 'linux':
@@ -368,5 +377,6 @@ function pathToDocuments(profileName?: string): vscode.Uri {
       break;
   }
 
+  // Return the URI either with a file name appended (export) or without it (import)
   return vscode.Uri.file(profileName ? `${basePath}/Documents/${profileName}.json` : `${basePath}/Documents/`);
 }
