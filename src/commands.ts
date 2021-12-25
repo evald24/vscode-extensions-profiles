@@ -276,14 +276,17 @@ export async function importProfile() {
     title: 'Select a profile to import',
     openLabel: 'Import',
     canSelectMany: false,
+    filters: {
+      'JSON files': ['json']
+    },
     defaultUri: pathToDocuments()
   });
 
   if (!resource)
-    return vscode.window.showErrorMessage(`Couldn't locate the path to exported profile! Try again`);
+    return vscode.window.showErrorMessage(`Couldn't locate the path to exported profile! Try again.`);
   const profileName = resource[0].path.split('/').pop()?.slice(0, -5);
   if (!profileName)
-    return vscode.window.showErrorMessage(`Couldn't resolve the name of the profile! Rename it and try again`);
+    return vscode.window.showErrorMessage(`Couldn't resolve the name of the profile! Rename it and try again.`);
 
   // Get extension list of cache
   let extensions = await getExtensionList();
