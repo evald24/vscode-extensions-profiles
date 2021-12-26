@@ -87,6 +87,7 @@
     "onCommand:vscode-extension-profiles.Delete",
     "onCommand:vscode-extension-profiles.Refresh",
     "onCommand:vscode-extension-profiles.Export",
+    "onCommand:vscode-extension-profiles.Import",
     "onStartupFinished"
   ],
   "dependencies": {

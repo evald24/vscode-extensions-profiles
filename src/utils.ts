@@ -1,3 +1,4 @@
+import { homedir } from "os";
 import { promisify } from "util";
 import * as vscode from "vscode";
 import { getGlobalStorageValue } from "./storage";
@@ -39,24 +40,18 @@ export function getExtensionsPath(): string {
 
 // User workspace storage
 export function getUserWorkspaceStoragePath(): string {
-  // eslint-disable-next-line curly
   if (process.platform === "win32") return `${getVSCodePath()}\\User\\workspaceStorage`;
-  // eslint-disable-next-line curly
   else return `${getVSCodePath()}/User/workspaceStorage`;
 }
 // Workspaces
 export function getWorkspacesPath(): string {
-  // eslint-disable-next-line curly
   if (process.platform === "win32") return `${getVSCodePath()}\\Workspaces`;
-  // eslint-disable-next-line curly
   else return `${getVSCodePath()}/Workspaces`;
 }
 
 // User global storage
 export function getUserGlobalStoragePath(): string {
-  // eslint-disable-next-line curly
   if (process.platform === "win32") return `${getVSCodePath()}\\User\\globalStorage`;
-  // eslint-disable-next-line curly
   else return `${getVSCodePath()}/User/globalStorage`;
 }
 
@@ -84,9 +79,7 @@ async function getFiles(dir: string, pattern: string): Promise<string[]> {
   const files = await Promise.all(
     subdirs.map(async (subdir: string) => {
       const res = path.resolve(dir, subdir);
-      // eslint-disable-next-line curly
       if ((await stat(res)).isDirectory()) return await getFiles(res, pattern);
-      // eslint-disable-next-line curly
       else if (res.substr(-1 * pattern.length) === pattern) return res;
       return undefined;
     }),
@@ -104,14 +97,10 @@ async function searchFolderUserWorkspaceStorage(files: string[], uriWorkspace: v
 
         let { folder, workspace }: { folder?: string; workspace?: string } = loadJSON(filePath);
         if (process.platform === "win32") {
-          // eslint-disable-next-line curly
           if (folder && folder.replace("%3A", ":").toLocaleLowerCase() === fileUrl(uriWorkspace).toLocaleLowerCase()) return filePath;
-          // eslint-disable-next-line curly
           if (workspace && workspace.replace("%3A", ":").toLocaleLowerCase() === fileUrl(uriWorkspace).toLocaleLowerCase()) return filePath;
         } else {
-          // eslint-disable-next-line curly
           if (folder && folder === fileUrl(uriWorkspace)) return filePath;
-          // eslint-disable-next-line curly
           if (workspace && workspace === fileUrl(uriWorkspace)) return filePath;
         }
       } catch (e) {
@@ -131,16 +120,12 @@ async function searchWorkspaces(files: string[], uriFolders: vscode.Uri[]) {
         if (!fs.existsSync(filePath))
           return undefined;
 
-
         let data: { folders?: Array<{ path: string }>; workspace?: string } = loadJSON(filePath);
 
         if (typeof data.workspace !== "undefined") {
           let fsPathWorkspace = vscode.Uri.parse(path.resolve(data.workspace.replace("file://", ""))).fsPath;
 
-          // eslint-disable-next-line curly
           if (process.platform === "win32") fsPathWorkspace = fsPathWorkspace.slice(1, fsPathWorkspace.length);
-
-          // eslint-disable-next-line curly
           if (!fs.existsSync(fsPathWorkspace)) return undefined;
 
           data = loadJSON(fsPathWorkspace);
@@ -152,13 +137,10 @@ async function searchWorkspaces(files: string[], uriFolders: vscode.Uri[]) {
         if (typeof data.folders !== "undefined") {
           let i = 0;
           for (const { path: relativePath } of data.folders) {
-            // eslint-disable-next-line curly
             const fsPath = path.resolve(relativePath);
             if (folders.includes(process.platform === "win32" ? fsPath.toLocaleLowerCase() : fsPath))
               i++;
-
           }
-          // eslint-disable-next-line curly
           if (i === folders.length) return filePath;
         }
       } catch (e) {
@@ -208,29 +190,65 @@ export async function getAllExtensions() {
   if (fs.existsSync(extPath + ".obsolete"))
     obsolete = Object.keys(loadJSON(extPath + ".obsolete"));
 
-
   let all = await readdir(extPath);
 
   await Promise.all(
     all.map(async (name) => {
-      if ((await stat(extPath + platformSlash + name)).isDirectory() && !obsolete.includes(name)) {
-        let info: PackageJson = require(extPath + name + platformSlash + "package.json");
-        extensions.push({
-          id: `${info.publisher.toLowerCase()}.${info.name.toLowerCase()}`,
-          uuid: info.__metadata.id,
-          label: info.displayName || info.name,
-          description: info.description,
-        });
+      if ((await stat(extPath + name)).isDirectory() && !obsolete.includes(name)) {
+        const packageJsonPath = extPath + name + platformSlash + "package.json";
+        try {
+          let info: PackageJson = require(packageJsonPath);
+
+          let extInfo = {
+            id: `${info.publisher.toLowerCase()}.${info.name.toLowerCase()}`,
+            uuid: info.__metadata?.id,
+            label: info.displayName || info.name,
+            description: info.description,
+          };
+
+          if(/^%.*%$/igm.test(extInfo.label))
+            extInfo.label = getExtensionLocaleValue(extPath + name + platformSlash, extInfo.label);
+
+          if(/^%.*%$/igm.test(extInfo.description))
+            extInfo.description = getExtensionLocaleValue(extPath + name + platformSlash, extInfo.description);
+
+          extensions.push(extInfo);
+        } catch (e) {
+          // vscode.window.showWarningMessage(`Could not get information from "${packageJsonPath}"`);
+          console.warn(e);
+        }
       }
     }),
   );
 
   return extensions.sort((a: any, b: any) => {
-    // eslint-disable-next-line curly
     if (a.label > b.label) return -1;
-    // eslint-disable-next-line curly
     else if (a.label < b.label) return 1;
-    // eslint-disable-next-line curly
     else return 0;
   });
+}
+
+export function getExtensionLocaleValue(extPath: string, key: string): string {
+  const language = vscode.env.language;
+
+  const defaultPath = `${extPath}${platformSlash}package.nls.json`;
+  const languagePath = `${extPath}${platformSlash}package.nls.${language}.json`;
+
+  if (fs.existsSync(languagePath))
+  return  require(languagePath)[key.replace(/%/g, "")];
+
+  try {
+    return require(defaultPath)[key.replace(/%/g, "")];
+  } catch (e) {
+    console.warn(`Not found translate file "${defaultPath}" for key "${key}"`);
+  }
+
+  return key;
+}
+
+// Return a path to a profile export file that will be in a 'Documents' folder or just the 'Documents'
+export function getPathToDocuments(profileName?: string): vscode.Uri {
+  let basePath = homedir();
+  // Return the URI either with a file name appended (export) or without it (import)
+  return vscode.Uri.file(profileName ? `${basePath}${platformSlash}Documents${platformSlash}${profileName}.json` : `${basePath}${platformSlash}Documents${platformSlash}`);
 }

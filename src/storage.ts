@@ -16,9 +16,7 @@ export async function getDisabledExtensionsGlobalStorage() {
 
   let data = (await db.get("SELECT key, value FROM ItemTable WHERE key = ?", "extensionsIdentifiers/disabled"))  as StorageValue || undefined;
 
-  if (data?.value) {
-    return JSON.parse(data.value) as ExtensionValue[];
-  }
+  if (data?.value) return JSON.parse(data.value) as ExtensionValue[];
 
   return []; // default
 }
@@ -44,9 +42,7 @@ export async function getWorkspaceStorageValue(uuid: string, key: "enabled" | "d
 
   let data = (await db.get("SELECT key, value FROM ItemTable WHERE key = ?", `extensionsIdentifiers/${key}`)) as StorageValue;
 
-  if (data?.value) {
-    return JSON.parse(data.value) as ExtensionValue[];
-  }
+  if (data?.value) return JSON.parse(data.value) as ExtensionValue[];
 
   return []; // default
 }
@@ -78,10 +74,7 @@ export async function getGlobalStorageValue(key: StorageKey) : Promise<Extension
 
   let data = (await db.get("SELECT key, value FROM ItemTable WHERE key = ?", key)) as StorageValue;
 
-
-  if (data?.value) {
-    return JSON.parse(data.value);
-  }
+  if (data?.value) return JSON.parse(data.value);
 
   return {}; // default
 }

@@ -4,7 +4,7 @@ import { readFile, writeFile } from "fs/promises";
 import * as vscode from "vscode";
 import { setGlobalStorageValue, setWorkspaceStorageValue } from "./storage";
 import { ExtensionList, ExtensionValue } from "./types";
-import { getAllExtensions, getExtensionList, getProfileList, getUserWorkspaceStorageUUID, getWorkspacesUUID } from "./utils";
+import { getAllExtensions, getExtensionList, getPathToDocuments, getProfileList, getUserWorkspaceStorageUUID, getWorkspacesUUID } from "./utils";
 
 // Select and apply profile ...
 export async function applyProfile() {
@@ -258,7 +258,7 @@ export async function exportProfile() {
   const resource = await vscode.window.showSaveDialog({
     title: 'Select a place and file name to save the exported profile',
     saveLabel: 'Export',
-    defaultUri: pathToDocuments(profileName) // Desided to export all extentions to a default 'Documents' folder
+    defaultUri: getPathToDocuments(profileName) // Desided to export all extentions to a default 'Documents' folder
   });
   if (!resource)
     return vscode.window.showErrorMessage(`Couldn't locate the path to exported profile! Try again`);
@@ -279,7 +279,7 @@ export async function importProfile() {
     filters: {
       'JSON files': ['json']
     },
-    defaultUri: pathToDocuments()
+    defaultUri: getPathToDocuments()
   });
 
   if (!resource)
@@ -317,15 +317,10 @@ export async function refreshExtensionList({ isCache = false }) {
             if (item.label === key)
               if (oldExtensionList[key].label)
                 item.label = oldExtensionList[key].label;
-
-
             if (oldExtensionList[key].description)
               item.description = oldExtensionList[key].description;
-
             break;
           }
-
-
     }
 
     newExtensionList[item.id] = {
@@ -335,7 +330,6 @@ export async function refreshExtensionList({ isCache = false }) {
     };
   }
 
-  //
   if (isCache)
     // Add missing items from the cache
     for (const key in oldExtensionList) {
@@ -346,40 +340,12 @@ export async function refreshExtensionList({ isCache = false }) {
           label: oldExtensionList[key].label,
           description: oldExtensionList[key].description,
         };
-
     }
-
 
   await setGlobalStorageValue("vscodeExtensionProfiles/extensions", newExtensionList);
 
   if (!isCache)
     vscode.window.showInformationMessage("Updated the list of installed extensions!");
 
-
   return newExtensionList;
-}
-
-// Return a path to a profile export file that will be in a 'Documents' folder or just the 'Documents'
-function pathToDocuments(profileName?: string): vscode.Uri {
-  /*
-   Since 'Documents' folder path changes from system to system 
-   I've defined a `basePath` variable to store a path to the 
-   user's folder. After that I just get the `cwd` path and change 
-   it based on user's OS. I then append the '/Documents/' and the 
-   file name if needed. 'Uri.file' takes '/' as path separators 
-   to create a URI so take that in considation when you work with this
-  */
-  let basePath = "";
-  switch (process.platform) {
-    case 'linux':
-    case 'darwin':
-      basePath = process.cwd().split('/').slice(1, 3).join('/');
-      break;
-    case 'win32':
-      // Windows users please add 
-      break;
-  }
-
-  // Return the URI either with a file name appended (export) or without it (import)
-  return vscode.Uri.file(profileName ? `${basePath}/Documents/${profileName}.json` : `${basePath}/Documents/`);
 }
