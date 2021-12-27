@@ -18,12 +18,13 @@ Apply a profile to a folder or workspace with a single command!
 
 ## Further development
 
-Explanation: 💡 - pending, ⚙️ ️- in progress, ❌ - cancelled
+Explanation: 💡 - pending, ⚙️ ️- in progress, ❌ - cancelled, ✅ - done
 
 My thoughts:
 
 - 💡 Apply a profile to a set of selected workspaces;
-- 💡 Import selected profiles;
+- ✅ Global profile;
+- ✅ Import selected profiles;
 - 💡 After installing new extensions, automatically add to the list of disabled extensions not specified in the profile;
 - 💡 Linking the project to the profile (auto update when the profile changes);
 - 💡 `ext-profiles.json` - local configuration file for projects and recommendations for installing missing extensions;
