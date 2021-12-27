@@ -206,10 +206,10 @@ export async function getAllExtensions() {
             description: info.description,
           };
 
-          if(/^%.*%$/igm.test(extInfo.label))
+          if (/^%.*%$/igm.test(extInfo.label))
             extInfo.label = getExtensionLocaleValue(extPath + name + platformSlash, extInfo.label);
 
-          if(/^%.*%$/igm.test(extInfo.description))
+          if (/^%.*%$/igm.test(extInfo.description))
             extInfo.description = getExtensionLocaleValue(extPath + name + platformSlash, extInfo.description);
 
           extensions.push(extInfo);
@@ -235,7 +235,7 @@ export function getExtensionLocaleValue(extPath: string, key: string): string {
   const languagePath = `${extPath}${platformSlash}package.nls.${language}.json`;
 
   if (fs.existsSync(languagePath))
-  return  require(languagePath)[key.replace(/%/g, "")];
+    return require(languagePath)[key.replace(/%/g, "")];
 
   try {
     return require(defaultPath)[key.replace(/%/g, "")];

@@ -14,7 +14,7 @@ export async function getDisabledExtensionsGlobalStorage() {
     driver: sqlite3.Database,
   });
 
-  let data = (await db.get("SELECT key, value FROM ItemTable WHERE key = ?", "extensionsIdentifiers/disabled"))  as StorageValue || undefined;
+  let data = (await db.get("SELECT key, value FROM ItemTable WHERE key = ?", "extensionsIdentifiers/disabled")) as StorageValue || undefined;
 
   if (data?.value) return JSON.parse(data.value) as ExtensionValue[];
 
@@ -24,8 +24,8 @@ export async function getDisabledExtensionsGlobalStorage() {
 // VSCode hides disabled extensions
 // https://github.com/microsoft/vscode/issues/15466
 export function getEnabledExtensions() {
-  return  vscode.extensions.all
-    .filter((e) =>  !/.*(?:\\\\|\/)resources(?:\\\\|\/)app(?:\\\\|\/)extensions(?:\\\\|\/).*/i.test(e.extensionPath)) // ignore internal extensions
+  return vscode.extensions.all
+    .filter((e) => !/.*(?:\\\\|\/)resources(?:\\\\|\/)app(?:\\\\|\/)extensions(?:\\\\|\/).*/i.test(e.extensionPath)) // ignore internal extensions
     .map(item => ({
       id: item.id,
       uuid: item?.packageJSON.uuid,
@@ -47,7 +47,7 @@ export async function getWorkspaceStorageValue(uuid: string, key: "enabled" | "d
   return []; // default
 }
 
-export async function setWorkspaceStorageValue(uuid: string,  key: "enabled" | "disabled", extensions: ExtensionValue[]) {
+export async function setWorkspaceStorageValue(uuid: string, key: "enabled" | "disabled", extensions: ExtensionValue[]) {
   const db = await open({
     filename: `${getUserWorkspaceStoragePath()}${platformSlash}${uuid}${platformSlash}state.vscdb`,
     driver: sqlite3.Database,
@@ -66,7 +66,7 @@ export async function setGlobalStorageValue(key: StorageKey, value: ExtensionLis
   return await db.run("INSERT OR REPLACE INTO ItemTable (key, value) VALUES (?, ?)", key, JSON.stringify(value));
 }
 
-export async function getGlobalStorageValue(key: StorageKey) : Promise<ExtensionList | ProfileList>{
+export async function getGlobalStorageValue(key: StorageKey): Promise<ExtensionList | ProfileList> {
   const db = await open({
     filename: getUserGlobalStoragePath() + platformSlash + "state.vscdb",
     driver: sqlite3.Database,
