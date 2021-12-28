@@ -1,7 +1,7 @@
 import { homedir } from "os";
 import { promisify } from "util";
 import * as vscode from "vscode";
-import { getGlobalStorageValue } from "./storage";
+import { getGlobalStorageValue, setGlobalStorageValue } from "./storage";
 import { ExtensionList, ExtensionValue, PackageJson, ProfileList } from "./types";
 
 import path = require("path");
@@ -246,9 +246,23 @@ export function getExtensionLocaleValue(extPath: string, key: string): string {
   return key;
 }
 
-// Return a path to a profile export file that will be in a 'Documents' folder or just the 'Documents'
+/**
+ *  Return a path to a profile export file that will be in a 'Documents' folder or just the 'Documents'.
+ */
 export function getPathToDocuments(profileName?: string): vscode.Uri {
   let basePath = homedir();
   // Return the URI either with a file name appended (export) or without it (import)
   return vscode.Uri.file(profileName ? `${basePath}${platformSlash}Documents${platformSlash}${profileName}.json` : `${basePath}${platformSlash}Documents${platformSlash}`);
+}
+
+/**
+ *  Check if a global profile exists. It will create one if there isn't any.
+ */
+export async function checkGlobalProfile() {
+  const globalProfileName = 'Global Profile';
+  const profiles = await getProfileList();
+  if (profiles[globalProfileName] === undefined)
+    profiles[globalProfileName] = {};
+
+  await setGlobalStorageValue("vscodeExtensionProfiles/profiles", profiles);
 }

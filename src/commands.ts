@@ -4,8 +4,8 @@ import { setGlobalStorageValue, setWorkspaceStorageValue } from "./storage";
 import { ExtensionList, ExtensionValue } from "./types";
 import { getAllExtensions, getExtensionList, getPathToDocuments, getProfileList, getUserWorkspaceStorageUUID, getWorkspacesUUID } from "./utils";
 
-// VSCode EXtention PRofiles Global Profile. User should not be able to update/delete/create a profile with this name
-const vscexprgp = 'vscexprgp';
+// User should not be able to update/delete/create a profile with this name
+const globalProfileName = 'Global Profile';
 
 // Select and apply profile ...
 export async function applyProfile() {
@@ -24,17 +24,14 @@ export async function applyProfile() {
   // Generate items
   let itemsProfiles: vscode.QuickPickItem[] = [];
   for (const item in profiles)
-    if (item !== vscexprgp)
-      itemsProfiles.push({
-        label: item,
-      });
-
+    itemsProfiles.push({
+      label: item,
+    });
 
   // Selected profile
   let profileName = (await vscode.window.showQuickPick(itemsProfiles, { placeHolder: "Search", title: "Select a profile" }))?.label;
   if (!profileName)
     return;
-
 
   // Check and refresh extension list
   let extensions = await getExtensionList();
@@ -49,7 +46,7 @@ export async function applyProfile() {
     let item: ExtensionValue = { id: key, uuid: extensions[key].uuid };
 
     // Set enabled and disabled extensions for workspace
-    if (profiles[profileName][key] !== undefined || profiles[vscexprgp][key] !== undefined)
+    if (profiles[profileName][key] !== undefined || (profiles[globalProfileName] && profiles[globalProfileName][key] !== undefined))
       enabledList.push(item);
     else
       disabledList.push(item);
@@ -66,7 +63,6 @@ export async function applyProfile() {
   } else
     uuid = await getUserWorkspaceStorageUUID(folders[0].uri);
 
-
   // write in workspace
   await setWorkspaceStorageValue(uuid, "enabled", enabledList);
   await setWorkspaceStorageValue(uuid, "disabled", disabledList);
@@ -74,50 +70,6 @@ export async function applyProfile() {
   // Reloading the window to apply extensions
   vscode.commands.executeCommand("workbench.action.reloadWindow");
   return;
-}
-
-// Update global profile ...
-export async function updateGlobalProfile() {
-  const profiles = await getProfileList();
-
-  // set name profile
-  const profileName = vscexprgp;
-
-  // Get extension list of cache
-  let extensions = await getExtensionList();
-
-  // update if not exist
-  if (Object.keys(extensions).length === 0)
-    extensions = await refreshExtensionList({ isCache: true });
-
-  // create extension list
-  let itemsWorkspace: vscode.QuickPickItem[] = [];
-  for (const key in extensions) {
-    let item = extensions[key];
-    itemsWorkspace.push({
-      label: item.label || key,
-      description: item.label ? key : undefined,
-      detail: item.description || " - - - - - ",
-    });
-  }
-
-  // show and select extensions
-  let selected = await vscode.window.showQuickPick(itemsWorkspace, {
-    canPickMany: true,
-    placeHolder: "The selected extensions will be enabled globally in every workspace.",
-    title: `Select extensions for the Global Profile`,
-  });
-
-  // set enabled extensions for profile
-  profiles[profileName] = {};
-
-  if (selected)
-    for (const { description: key } of selected)
-      profiles[profileName][key!] = extensions[key!];
-
-  await setGlobalStorageValue("vscodeExtensionProfiles/profiles", profiles);
-
-  return vscode.window.showInformationMessage(`Global Profile successfully updated!`);
 }
 
 // Create profile ...
@@ -133,7 +85,7 @@ export async function createProfile() {
     if (profileName && Object.keys(profiles).includes(profileName)) {
       placeHolder = `The profile \"${profileName}\" already exists, think of another name`;
       continue; //go next step
-    } else if (profileName && profileName === vscexprgp)
+    } else if (profileName && profileName === globalProfileName)
       placeHolder = 'This profile name is reserved, please use another one';
     else if (!profileName)
       return; // close input box
@@ -193,17 +145,15 @@ export async function editProfile() {
   // Generate items
   let itemsProfiles: vscode.QuickPickItem[] = [];
   for (const item in profiles)
-    if (item !== vscexprgp)
-      itemsProfiles.push({
-        label: item,
-      });
+    itemsProfiles.push({
+      label: item
+    });
 
 
   // Selected profile
   let profileName = (await vscode.window.showQuickPick(itemsProfiles, { placeHolder: "Search", title: "Select a profile to edit" }))?.label;
   if (!profileName)
     return;
-
 
   // Check and refresh extension list
   let extensions = await getExtensionList();
@@ -259,12 +209,10 @@ export async function deleteProfile() {
   if (Object.keys(profiles).length === 0)
     return vscode.window.showInformationMessage("All right, no profiles to delete! 😌");
 
-
-
   // Generate items
   let itemsProfiles: vscode.QuickPickItem[] = [];
   for (const item in profiles)
-    if (item !== vscexprgp)
+    if (item !== globalProfileName)
       itemsProfiles.push({
         label: item,
       });
@@ -274,7 +222,6 @@ export async function deleteProfile() {
   let profileName = (await vscode.window.showQuickPick(itemsProfiles, { placeHolder: "Search", title: "Select a profile to edit" }))?.label;
   if (!profileName)
     return;
-
 
   delete profiles[profileName];
 
@@ -293,16 +240,13 @@ export async function exportProfile() {
   let itemsProfiles: vscode.QuickPickItem[] = [];
   for (const item in profiles)
     itemsProfiles.push({
-      label: item === vscexprgp ? 'Global Profile' : item
+      label: item
     });
-
-
 
   // Selected profile
   let profileName = (await vscode.window.showQuickPick(itemsProfiles, { placeHolder: "Search", title: "Select a profile to export" }))?.label;
   if (!profileName)
     return;
-
 
   const resource = await vscode.window.showSaveDialog({
     title: 'Select a place and file name to save the exported profile',
@@ -349,39 +293,6 @@ export async function importProfile() {
   await setGlobalStorageValue("vscodeExtensionProfiles/profiles", profiles);
 
   return vscode.window.showInformationMessage(`Profile "${profileName}" successfully imported!`);
-}
-
-export async function importGlobalProfile() {
-  const profiles = await getProfileList();
-
-  // Use showSaveDialog to get a path to the profile
-  const resource = await vscode.window.showOpenDialog({
-    title: 'Select a Global Profile to import',
-    openLabel: 'Import',
-    canSelectMany: false,
-    filters: {
-      'JSON files': ['json']
-    },
-    defaultUri: getPathToDocuments()
-  });
-
-  if (!resource)
-    return vscode.window.showErrorMessage(`Couldn't locate the path to the Global Profile! Try again.`);
-  const profileName = vscexprgp;
-
-  // Get extension list of cache
-  let extensions = await getExtensionList();
-
-  // update if not exist
-  if (Object.keys(extensions).length === 0)
-    extensions = await refreshExtensionList({ isCache: true });
-
-  // Add the imported profile
-  profiles[profileName] = JSON.parse((await readFile(resource[0].fsPath)).toString());
-
-  await setGlobalStorageValue("vscodeExtensionProfiles/profiles", profiles);
-
-  return vscode.window.showInformationMessage(`Global Profile successfully imported!`);
 }
 
 export async function refreshExtensionList({ isCache = false }) {

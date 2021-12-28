@@ -1,7 +1,8 @@
 "use strict";
 import * as vscode from "vscode";
-import { applyProfile, createProfile, deleteProfile, editProfile, exportProfile, importProfile, refreshExtensionList, updateGlobalProfile } from "./commands";
+import { applyProfile, createProfile, deleteProfile, editProfile, exportProfile, importProfile, refreshExtensionList } from "./commands";
 import { CommandType } from "./types";
+import { checkGlobalProfile } from "./utils";
 
 export async function activate(ctx: vscode.ExtensionContext) {
   // Refreshing the list of extensions after startup
@@ -15,9 +16,11 @@ export async function activate(ctx: vscode.ExtensionContext) {
     vscode.commands.registerCommand("vscode-extension-profiles.Edit" as CommandType, editProfile),
     vscode.commands.registerCommand("vscode-extension-profiles.Delete" as CommandType, deleteProfile),
     vscode.commands.registerCommand("vscode-extension-profiles.Export" as CommandType, exportProfile),
-    vscode.commands.registerCommand("vscode-extension-profiles.Import" as CommandType, importProfile),
-    vscode.commands.registerCommand("vscode-extension-profiles.UpdateGlobal" as CommandType, updateGlobalProfile),
+    vscode.commands.registerCommand("vscode-extension-profiles.Import" as CommandType, importProfile)
   );
+
+  // Check for global profile
+  await checkGlobalProfile();
 }
 
 export function deactivate() { }

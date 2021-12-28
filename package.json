@@ -77,11 +77,6 @@
         "command": "vscode-extension-profiles.Import",
         "title": "Extension profiles: Import profile",
         "shortTitle": "Import profile"
-      },
-      {
-        "command": "vscode-extension-profiles.UpdateGlobal",
-        "title": "Extension profiles: Update Global Profile",
-        "shortTitle": "Update Global Profile"
       }
     ]
   },
@@ -93,7 +88,6 @@
     "onCommand:vscode-extension-profiles.Refresh",
     "onCommand:vscode-extension-profiles.Export",
     "onCommand:vscode-extension-profiles.Import",
-    "onCommand:vscode-extension-profiles.UpdateGlobal",
     "onStartupFinished"
   ],
   "dependencies": {
