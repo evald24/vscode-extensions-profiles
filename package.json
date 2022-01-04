@@ -92,7 +92,6 @@
   ],
   "dependencies": {
     "@mapbox/node-pre-gyp": "^1.0.5",
-    "platform-folders": "^0.5.4",
     "sqlite": "^4.0.23",
     "sqlite3": "^5.0.2"
   },

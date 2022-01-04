@@ -1,4 +1,4 @@
-import { getDocumentsFolder } from "platform-folders";
+import { homedir } from "os";
 import { promisify } from "util";
 import * as vscode from "vscode";
 import { GLOBAL_PROFILE, PLATFORM_SLASH } from "./constans";
@@ -250,9 +250,9 @@ export function getExtensionLocaleValue(extPath: string, key: string): string {
  *  Return a path to a profile export file that will be in a 'Documents' folder or just the 'Documents'.
  */
 export function getPathToDocuments(profileName?: string): vscode.Uri {
-  let documentsPath = getDocumentsFolder();
+  let documentsPath = `${homedir()}${PLATFORM_SLASH}Documents${PLATFORM_SLASH}`;
   // Return the URI either with a file name appended (export) or without it (import)
-  return vscode.Uri.file(profileName ? `${documentsPath}${PLATFORM_SLASH}${profileName}.json` : `${documentsPath}${PLATFORM_SLASH}`);
+  return vscode.Uri.file(profileName ? `${documentsPath}${profileName}.json` : documentsPath);
 }
 
 /**
