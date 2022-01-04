@@ -268,11 +268,12 @@ export async function checkGlobalProfile() {
 
 // Set environments from context
 export async function setEnv(ctx: vscode.ExtensionContext) {
+
   // Set global storage path
-  process.env.GLOBAL_STORAGE_PATH = path.join(ctx.globalStorageUri.path, "../");
+  process.env.GLOBAL_STORAGE_PATH = path.join(ctx.globalStorageUri.path, "../").replace(/^\\/, "");
 
   // Set workspace storage path
-  if (ctx.storageUri) process.env.WORKSPACE_STORAGE_PATH = path.join(ctx.storageUri.path, "../../");
+  if (ctx.storageUri) process.env.WORKSPACE_STORAGE_PATH = path.join(ctx.storageUri.path, "../../").replace(/^\\/, "");
 
   // Set workspace storage UUID
   let folders = vscode.workspace.workspaceFolders;
