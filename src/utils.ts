@@ -1,6 +1,7 @@
-import { homedir } from "os";
+import { getDocumentsFolder } from "platform-folders";
 import { promisify } from "util";
 import * as vscode from "vscode";
+import { GLOBAL_PROFILE, PLATFORM_SLASH } from "./constans";
 import { getGlobalStorageValue, setGlobalStorageValue } from "./storage";
 import { ExtensionList, ExtensionValue, PackageJson, ProfileList } from "./types";
 
@@ -9,7 +10,6 @@ import fs = require("fs");
 const readdir = promisify(fs.readdir);
 const stat = promisify(fs.stat);
 
-const platformSlash = process.platform === "win32" ? "\\" : "/";
 
 // VSCode path in different OS
 // https://code.visualstudio.com/docs/setup/setup-overview#_how-can-i-do-a-clean-uninstall-of-vs-code
@@ -55,22 +55,22 @@ export function getUserGlobalStoragePath(): string {
   else return `${getVSCodePath()}/User/globalStorage`;
 }
 
-export async function getUserWorkspaceStorageUUID(uriWorkspace: vscode.Uri): Promise<string> {
+export async function getPathUserWorkspaceStorageUUID(uriWorkspace: vscode.Uri): Promise<string> {
   let pathUserWorkspaceStorage = getUserWorkspaceStoragePath();
 
   const files = await getFiles(pathUserWorkspaceStorage, "workspace.json");
   const fsPath = (await searchFolderUserWorkspaceStorage(files, uriWorkspace))[0]!;
-  return fsPath.replace(pathUserWorkspaceStorage + platformSlash, "").replace(platformSlash + "workspace.json", "");
+  return fsPath.replace(pathUserWorkspaceStorage + PLATFORM_SLASH, "").replace(PLATFORM_SLASH + "workspace.json", "");
 }
 
-export async function getWorkspacesUUID(uriWorkspaces: vscode.Uri[]): Promise<string> {
+export async function getPathWorkspacesUUID(uriWorkspaces: vscode.Uri[]): Promise<string> {
   let pathWorkspaces = getWorkspacesPath();
   let pathUserWorkspaceStorage = getUserWorkspaceStoragePath();
 
   const filesWorkspaces = await getFiles(pathWorkspaces, "workspace.json");
   const filesUserWorkspaceStorage = await getFiles(pathUserWorkspaceStorage, "workspace.json");
   const fsPath = (await searchWorkspaces([...filesWorkspaces, ...filesUserWorkspaceStorage], uriWorkspaces))[0]!;
-  return fsPath.replace(pathUserWorkspaceStorage + platformSlash, "").replace(platformSlash + "workspace.json", "");
+  return fsPath.replace(pathUserWorkspaceStorage + PLATFORM_SLASH, "").replace(PLATFORM_SLASH + "workspace.json", "");
 }
 
 // Recursive search for files in a directory with pattern
@@ -195,7 +195,7 @@ export async function getAllExtensions() {
   await Promise.all(
     all.map(async (name) => {
       if ((await stat(extPath + name)).isDirectory() && !obsolete.includes(name)) {
-        const packageJsonPath = extPath + name + platformSlash + "package.json";
+        const packageJsonPath = extPath + name + PLATFORM_SLASH + "package.json";
         try {
           let info: PackageJson = require(packageJsonPath);
 
@@ -207,10 +207,10 @@ export async function getAllExtensions() {
           };
 
           if (/^%.*%$/igm.test(extInfo.label))
-            extInfo.label = getExtensionLocaleValue(extPath + name + platformSlash, extInfo.label);
+            extInfo.label = getExtensionLocaleValue(extPath + name + PLATFORM_SLASH, extInfo.label);
 
           if (/^%.*%$/igm.test(extInfo.description))
-            extInfo.description = getExtensionLocaleValue(extPath + name + platformSlash, extInfo.description);
+            extInfo.description = getExtensionLocaleValue(extPath + name + PLATFORM_SLASH, extInfo.description);
 
           extensions.push(extInfo);
         } catch (e) {
@@ -231,8 +231,8 @@ export async function getAllExtensions() {
 export function getExtensionLocaleValue(extPath: string, key: string): string {
   const language = vscode.env.language;
 
-  const defaultPath = `${extPath}${platformSlash}package.nls.json`;
-  const languagePath = `${extPath}${platformSlash}package.nls.${language}.json`;
+  const defaultPath = `${extPath}${PLATFORM_SLASH}package.nls.json`;
+  const languagePath = `${extPath}${PLATFORM_SLASH}package.nls.${language}.json`;
 
   if (fs.existsSync(languagePath))
     return require(languagePath)[key.replace(/%/g, "")];
@@ -250,19 +250,38 @@ export function getExtensionLocaleValue(extPath: string, key: string): string {
  *  Return a path to a profile export file that will be in a 'Documents' folder or just the 'Documents'.
  */
 export function getPathToDocuments(profileName?: string): vscode.Uri {
-  let basePath = homedir();
+  let documentsPath = getDocumentsFolder();
   // Return the URI either with a file name appended (export) or without it (import)
-  return vscode.Uri.file(profileName ? `${basePath}${platformSlash}Documents${platformSlash}${profileName}.json` : `${basePath}${platformSlash}Documents${platformSlash}`);
+  return vscode.Uri.file(profileName ? `${documentsPath}${PLATFORM_SLASH}${profileName}.json` : `${documentsPath}${PLATFORM_SLASH}`);
 }
 
 /**
  *  Check if a global profile exists. It will create one if there isn't any.
  */
 export async function checkGlobalProfile() {
-  const globalProfileName = 'Global Profile';
   const profiles = await getProfileList();
-  if (profiles[globalProfileName] === undefined)
-    profiles[globalProfileName] = {};
+  if (profiles[GLOBAL_PROFILE] === undefined)
+    profiles[GLOBAL_PROFILE] = {};
 
   await setGlobalStorageValue("vscodeExtensionProfiles/profiles", profiles);
+}
+
+// Set environments from context
+export async function setEnv(ctx: vscode.ExtensionContext) {
+  // Set global storage path
+  process.env.GLOBAL_STORAGE_PATH = path.join(ctx.globalStorageUri.path, "../");
+
+  // Set workspace storage path
+  if (ctx.storageUri) process.env.WORKSPACE_STORAGE_PATH = path.join(ctx.storageUri.path, "../../");
+
+  // Set workspace storage UUID
+  let folders = vscode.workspace.workspaceFolders;
+  if (folders !== undefined) {
+    if (folders.length > 1) {
+      let uriFolders: vscode.Uri[] = [];
+      for (const folder of folders) uriFolders.push(folder.uri);
+      process.env.WORKSPACE_STORAGE_UUID = await getPathWorkspacesUUID(uriFolders);
+    } else process.env.WORKSPACE_STORAGE_UUID = await getPathUserWorkspaceStorageUUID(folders[0].uri);
+    process.env.WORKSPACE_STORAGE_PATH_UUID = `${process.env.WORKSPACE_STORAGE_PATH}${PLATFORM_SLASH}${process.env.WORKSPACE_STORAGE_UUID}${PLATFORM_SLASH}`;
+  }
 }

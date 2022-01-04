@@ -1,11 +1,10 @@
 import { readFile, writeFile } from "fs/promises";
 import * as vscode from "vscode";
+import { GLOBAL_PROFILE } from "./constans";
 import { setGlobalStorageValue, setWorkspaceStorageValue } from "./storage";
 import { ExtensionList, ExtensionValue } from "./types";
-import { getAllExtensions, getExtensionList, getPathToDocuments, getProfileList, getUserWorkspaceStorageUUID, getWorkspacesUUID } from "./utils";
+import { getAllExtensions, getExtensionList, getPathToDocuments, getProfileList } from "./utils";
 
-// User should not be able to update/delete/create a profile with this name
-const globalProfileName = 'Global Profile';
 
 // Select and apply profile ...
 export async function applyProfile() {
@@ -14,12 +13,10 @@ export async function applyProfile() {
   if (folders === undefined)
     return vscode.window.showErrorMessage("Working folder not found, open a folder an try again.");
 
-
   // Get and check profiles
   const profiles = await getProfileList();
   if (Object.keys(profiles).length === 0)
     return vscode.window.showErrorMessage("No profiles found, please create a profile first.");
-
 
   // Generate items
   let itemsProfiles: vscode.QuickPickItem[] = [];
@@ -38,7 +35,6 @@ export async function applyProfile() {
   if (Object.keys(extensions).length === 0)
     extensions = await refreshExtensionList({ isCache: true });
 
-
   let enabledList: ExtensionValue[] = [];
   let disabledList: ExtensionValue[] = [];
 
@@ -46,26 +42,15 @@ export async function applyProfile() {
     let item: ExtensionValue = { id: key, uuid: extensions[key].uuid };
 
     // Set enabled and disabled extensions for workspace
-    if (profiles[profileName][key] !== undefined || (profiles[globalProfileName] && profiles[globalProfileName][key] !== undefined))
+    if (profiles[profileName][key] !== undefined || (profiles[GLOBAL_PROFILE] && profiles[GLOBAL_PROFILE][key] !== undefined))
       enabledList.push(item);
     else
       disabledList.push(item);
-
   }
 
-  let uuid = "";
-  if (folders.length > 1) {
-    let uriFolders: vscode.Uri[] = [];
-    for (const folder of folders)
-      uriFolders.push(folder.uri);
-
-    uuid = await getWorkspacesUUID(uriFolders);
-  } else
-    uuid = await getUserWorkspaceStorageUUID(folders[0].uri);
-
   // write in workspace
-  await setWorkspaceStorageValue(uuid, "enabled", enabledList);
-  await setWorkspaceStorageValue(uuid, "disabled", disabledList);
+  await setWorkspaceStorageValue("enabled", enabledList);
+  await setWorkspaceStorageValue("disabled", disabledList);
 
   // Reloading the window to apply extensions
   vscode.commands.executeCommand("workbench.action.reloadWindow");
@@ -85,7 +70,7 @@ export async function createProfile() {
     if (profileName && Object.keys(profiles).includes(profileName)) {
       placeHolder = `The profile \"${profileName}\" already exists, think of another name`;
       continue; //go next step
-    } else if (profileName && profileName === globalProfileName)
+    } else if (profileName && profileName === GLOBAL_PROFILE)
       placeHolder = 'This profile name is reserved, please use another one';
     else if (!profileName)
       return; // close input box
@@ -99,7 +84,6 @@ export async function createProfile() {
   // update if not exist
   if (Object.keys(extensions).length === 0)
     extensions = await refreshExtensionList({ isCache: true });
-
 
   // create extension list
   let itemsWorkspace: vscode.QuickPickItem[] = [];
@@ -125,8 +109,6 @@ export async function createProfile() {
   if (selected)
     for (const { description: key } of selected)
       profiles[profileName][key!] = extensions[key!];
-
-
 
   await setGlobalStorageValue("vscodeExtensionProfiles/profiles", profiles);
 
@@ -149,7 +131,6 @@ export async function editProfile() {
       label: item
     });
 
-
   // Selected profile
   let profileName = (await vscode.window.showQuickPick(itemsProfiles, { placeHolder: "Search", title: "Select a profile to edit" }))?.label;
   if (!profileName)
@@ -160,11 +141,9 @@ export async function editProfile() {
   if (Object.keys(extensions).length === 0)
     extensions = await refreshExtensionList({ isCache: true });
 
-
   // add exists (maybe disabled extension)
   for (const key in profiles[profileName])
     extensions[key] = profiles[profileName][key];
-
 
   // create extension list
   let itemsWorkspace: vscode.QuickPickItem[] = [];
@@ -178,7 +157,6 @@ export async function editProfile() {
     });
   }
 
-
   // show and select extensions
   let selected = await vscode.window.showQuickPick(itemsWorkspace, {
     canPickMany: true,
@@ -186,17 +164,14 @@ export async function editProfile() {
     title: `Select extensions for "${profileName}"`,
   });
 
-
   // set enabled extensions for profile
   profiles[profileName] = {};
 
   if (selected)
     for (const { description: key } of selected)
       profiles[profileName][key!] = extensions[key!];
-
   else
     return;
-
 
   await setGlobalStorageValue("vscodeExtensionProfiles/profiles", profiles);
   return vscode.window.showInformationMessage(`Profile "${profileName}" successfully updated!`);
@@ -212,11 +187,10 @@ export async function deleteProfile() {
   // Generate items
   let itemsProfiles: vscode.QuickPickItem[] = [];
   for (const item in profiles)
-    if (item !== globalProfileName)
+    if (item !== GLOBAL_PROFILE)
       itemsProfiles.push({
         label: item,
       });
-
 
   // Selected profile
   let profileName = (await vscode.window.showQuickPick(itemsProfiles, { placeHolder: "Search", title: "Select a profile to edit" }))?.label;
