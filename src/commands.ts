@@ -194,14 +194,18 @@ export async function deleteProfile() {
       });
 
   // Selected profile
-  let profileName = (await vscode.window.showQuickPick(itemsProfiles, { placeHolder: "Search", title: "Select a profile to edit" }))?.label;
-  if (!profileName)
+  let selectedItems = (await vscode.window.showQuickPick(itemsProfiles, { placeHolder: "Search", title: "Select a profile to delete", canPickMany: true }));
+  if (selectedItems === undefined || selectedItems.length === 0)
     return;
 
-  delete profiles[profileName];
+  let deletedProfiles = [];
+  for (const { label } of selectedItems) {
+    delete profiles[label];
+    deletedProfiles.push(label);
+  }
 
   await setGlobalStorageValue("vscodeExtensionProfiles/profiles", profiles);
-  return vscode.window.showInformationMessage(`Profile "${profileName}" successfully deleted!`);
+  return vscode.window.showInformationMessage(`Profile${deleteProfile.length > 1 ? "s": ""} "${deletedProfiles.join(", ")}" successfully deleted!`);
 }
 
 // Export a profile...
