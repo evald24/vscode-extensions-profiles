@@ -205,7 +205,7 @@ export async function deleteProfile() {
   }
 
   await setGlobalStorageValue("vscodeExtensionProfiles/profiles", profiles);
-  return vscode.window.showInformationMessage(`Profile${deleteProfile.length > 1 ? "s": ""} "${deletedProfiles.join(", ")}" successfully deleted!`);
+  return vscode.window.showInformationMessage(`Profile${deletedProfiles.length > 1 ? "s": ""} "${deletedProfiles.join(", ")}" successfully deleted!`);
 }
 
 // Export a profile...
