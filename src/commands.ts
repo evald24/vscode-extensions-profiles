@@ -21,9 +21,10 @@ export async function applyProfile() {
   // Generate items
   let itemsProfiles: vscode.QuickPickItem[] = [];
   for (const item in profiles)
-    itemsProfiles.push({
-      label: item,
-    });
+    if(item !== GLOBAL_PROFILE)
+      itemsProfiles.push({
+        label: item,
+      });
 
   // Selected profile
   let profileName = (await vscode.window.showQuickPick(itemsProfiles, { placeHolder: "Search", title: "Select a profile" }))?.label;
@@ -235,8 +236,6 @@ export async function exportProfile() {
 
 // Import a profile...
 export async function importProfile() {
-  const profiles = await getProfileList();
-
   // Use showSaveDialog to get a path to the profile
   const resource = await vscode.window.showOpenDialog({
     title: 'Select a profile to import',
@@ -260,6 +259,8 @@ export async function importProfile() {
   // update if not exist
   if (Object.keys(extensions).length === 0)
     extensions = await refreshExtensionList({ isCache: true });
+
+  const profiles = await getProfileList();
 
   // Add the imported profile
   profiles[profileName] = JSON.parse((await readFile(resource[0].fsPath)).toString());

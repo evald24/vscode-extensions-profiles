@@ -170,8 +170,17 @@ export function fileUrl(filePath: vscode.Uri, options: any = { resolve: true }) 
   return encodeURI(`file://${pathName}`).replace(/[?#]/g, encodeURIComponent);
 }
 
+function sortObjectByKey(obj: any) {
+  return Object.keys(obj).sort().reduce(
+    (result: any, key) => {
+      result[key] = obj[key];
+      return result;
+    }, {}
+  );
+}
+
 export async function getProfileList() {
-  return (await getGlobalStorageValue("vscodeExtensionProfiles/profiles")) as ProfileList;
+  return sortObjectByKey(await getGlobalStorageValue("vscodeExtensionProfiles/profiles") as ProfileList);
 }
 
 export async function getExtensionList() {
