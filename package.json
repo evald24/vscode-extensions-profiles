@@ -1,7 +1,7 @@
 {
   "name": "vscode-extension-profiles",
   "displayName": "Extension profiles",
-  "version": "1.0.9",
+  "version": "1.1.0",
   "private": false,
   "description": "Lets you create profiles to include the selected extensions in the desired project.",
   "categories": [
@@ -67,6 +67,16 @@
         "command": "vscode-extension-profiles.Delete",
         "title": "Extension profiles: Delete profile",
         "shortTitle": "Delete profile"
+      },
+      {
+        "command": "vscode-extension-profiles.Export",
+        "title": "Extension profiles: Export profile",
+        "shortTitle": "Export profile"
+      },
+      {
+        "command": "vscode-extension-profiles.Import",
+        "title": "Extension profiles: Import profile",
+        "shortTitle": "Import profile"
       }
     ]
   },
@@ -76,6 +86,8 @@
     "onCommand:vscode-extension-profiles.Edit",
     "onCommand:vscode-extension-profiles.Delete",
     "onCommand:vscode-extension-profiles.Refresh",
+    "onCommand:vscode-extension-profiles.Export",
+    "onCommand:vscode-extension-profiles.Import",
     "onStartupFinished"
   ],
   "dependencies": {

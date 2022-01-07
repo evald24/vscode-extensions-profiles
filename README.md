@@ -18,16 +18,19 @@ Apply a profile to a folder or workspace with a single command!
 
 ## Further development
 
-Explanation: 💡 - pending, ⚙️ ️- in progress, ❌ - cancelled
+Explanation: 💡 - pending, ⚙️ ️- in progress, ❌ - cancelled, ✅ - done
 
 My thoughts:
 
 - 💡 Apply a profile to a set of selected workspaces;
-- 💡 Import selected profiles;
+- ✅ Global profile;
+- ✅ Import selected profiles;
+- 💡 Multiple apply of profiles;
 - 💡 After installing new extensions, automatically add to the list of disabled extensions not specified in the profile;
-- 💡 Linking the project to the profile (auto update when the profile changes);
-- 💡 `ext-profiles.json` - local configuration file for projects and recommendations for installing missing extensions;
-- 💡 More convenient modification of plugins for a separate project without linking to a profile or creating it;
-- 💡 Create a profile from the current or selected project.
+- 💡 Linking the project to the profile (notification and application of changes when changing the profile);
+- 💡 Recommendations for installing missing extensions;
+- 💡 Convenient management of extensions for a separate project without linking to a profile or creating it;
+- 💡 Create a profile from the current or selected project;
+- 💡 Multiply delete profiles.
 
 I invite you to discuss these thoughts and suggestions in this issue: [Do I need additional functionality?](https://github.com/evald24/vscode-extensions-profiles/issues/1)

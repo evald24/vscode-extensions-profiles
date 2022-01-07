@@ -26,7 +26,6 @@ export type PackageJson = {
   "description": string,
   "version": string,
   "publisher": string,
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   "__metadata": {
     "id": string,
     "publisherId": string,
