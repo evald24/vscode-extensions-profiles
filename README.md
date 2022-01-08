@@ -31,6 +31,6 @@ My thoughts:
 - 💡 Recommendations for installing missing extensions;
 - 💡 Convenient management of extensions for a separate project without linking to a profile or creating it;
 - 💡 Create a profile from the current or selected project;
-- 💡 Multiply delete profiles.
+- ✅ Multiply delete profiles.
 
 I invite you to discuss these thoughts and suggestions in this issue: [Do I need additional functionality?](https://github.com/evald24/vscode-extensions-profiles/issues/1)
