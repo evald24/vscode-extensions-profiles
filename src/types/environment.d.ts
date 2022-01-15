@@ -1,10 +1,10 @@
 declare global {
   namespace NodeJS {
     interface ProcessEnv {
-      GLOBAL_STORAGE_PATH: string;
-      WORKSPACE_STORAGE_PATH: string | undefined;
-      WORKSPACE_STORAGE_UUID: string | undefined;
-      WORKSPACE_STORAGE_PATH_UUID: string | undefined;
+      VXP_GLOBAL_STORAGE_PATH: string;
+      VXP_WORKSPACE_STORAGE_PATH?: string;
+      VXP_WORKSPACE_STORAGE_UUID?: string;
+      VXP_WORKSPACE_STORAGE_PATH_UUID?: string;
     }
   }
 }
