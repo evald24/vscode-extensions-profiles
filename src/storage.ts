@@ -8,7 +8,7 @@ import { ExtensionList, ExtensionValue, ProfileList, StorageKey, StorageValue } 
 //
 export async function getDisabledExtensionsGlobalStorage() {
   const db = await open({
-    filename: `${process.env.GLOBAL_STORAGE_PATH}state.vscdb`,
+    filename: `${process.env.VXP_GLOBAL_STORAGE_PATH}state.vscdb`,
     driver: sqlite3.Database,
   });
 
@@ -34,7 +34,7 @@ export function getEnabledExtensions() {
 
 export async function getWorkspaceStorageValue(key: "enabled" | "disabled") {
   const db = await open({
-    filename: `${process.env.WORKSPACE_STORAGE_PATH_UUID}state.vscdb`,
+    filename: `${process.env.VXP_WORKSPACE_STORAGE_PATH_UUID}state.vscdb`,
     driver: sqlite3.Database,
   });
 
@@ -47,7 +47,7 @@ export async function getWorkspaceStorageValue(key: "enabled" | "disabled") {
 
 export async function setWorkspaceStorageValue(key: "enabled" | "disabled", extensions: ExtensionValue[]) {
   const db = await open({
-    filename: `${process.env.WORKSPACE_STORAGE_PATH_UUID}state.vscdb`,
+    filename: `${process.env.VXP_WORKSPACE_STORAGE_PATH_UUID}state.vscdb`,
     driver: sqlite3.Database,
   });
 
@@ -57,7 +57,7 @@ export async function setWorkspaceStorageValue(key: "enabled" | "disabled", exte
 
 export async function setGlobalStorageValue(key: StorageKey, value: ExtensionList | ProfileList) {
   const db = await open({
-    filename: `${process.env.GLOBAL_STORAGE_PATH}state.vscdb`,
+    filename: `${process.env.VXP_GLOBAL_STORAGE_PATH}state.vscdb`,
     driver: sqlite3.Database,
   });
 
@@ -66,7 +66,7 @@ export async function setGlobalStorageValue(key: StorageKey, value: ExtensionLis
 
 export async function getGlobalStorageValue(key: StorageKey): Promise<ExtensionList | ProfileList> {
   const db = await open({
-    filename: `${process.env.GLOBAL_STORAGE_PATH}state.vscdb`,
+    filename: `${process.env.VXP_GLOBAL_STORAGE_PATH}state.vscdb`,
     driver: sqlite3.Database,
   });
 

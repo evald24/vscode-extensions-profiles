@@ -1,7 +1,7 @@
 {
   "name": "vscode-extension-profiles",
   "displayName": "Extension profiles",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "private": false,
   "description": "Lets you create profiles to include the selected extensions in the desired project.",
   "categories": [
@@ -35,11 +35,14 @@
     "watch": "tsc -watch -p ./",
     "pretest": "npm run compile && npm run lint",
     "test": "node ./out/test/runTest.js",
-    "prepackage": "npm run prepackage:sqlite:linux && npm run prepackage:sqlite:win32 && npm run prepackage:sqlite:win64 && npm run prepackage:sqlite:mac",
-    "prepackage:sqlite:linux": "./node_modules/.bin/node-pre-gyp install --directory=./node_modules/sqlite3 --target_platform=linux --target_arch=x64",
-    "prepackage:sqlite:win32": "./node_modules/.bin/node-pre-gyp install --directory=./node_modules/sqlite3 --target_platform=win32 --target_arch=ia32",
-    "prepackage:sqlite:win64": "./node_modules/.bin/node-pre-gyp install --directory=./node_modules/sqlite3 --target_platform=win32 --target_arch=x64",
-    "prepackage:sqlite:mac": "./node_modules/.bin/node-pre-gyp install --directory=./node_modules/sqlite3 --target_platform=darwin --target_arch=x64"
+    "prepackage": "cp -R ./bin/sqlite3/ ./node_modules/sqlite3/lib/binding/",
+    "build": "npm run build:sqlite",
+    "build:sqlite": "npm run build:sqlite:linux && npm run build:sqlite:win32 && npm run build:sqlite:win64 && npm run build:sqlite:mac && npm run build:sqlite:mac:arm64 && cp -R ./node_modules/sqlite3/lib/binding/ ./bin/sqlite3/",
+    "build:sqlite:linux": "./node_modules/.bin/node-pre-gyp install --directory=./node_modules/sqlite3 --target_platform=linux --target_arch=x64",
+    "build:sqlite:win32": "./node_modules/.bin/node-pre-gyp install --directory=./node_modules/sqlite3 --target_platform=win32 --target_arch=ia32",
+    "build:sqlite:win64": "./node_modules/.bin/node-pre-gyp install --directory=./node_modules/sqlite3 --target_platform=win32 --target_arch=x64",
+    "build:sqlite:mac": "./node_modules/.bin/node-pre-gyp install --directory=./node_modules/sqlite3 --target_platform=darwin --target_arch=x64",
+    "build:sqlite:mac:arm64": "./node_modules/.bin/node-pre-gyp install --directory=./node_modules/sqlite3 --target_platform=darwin --target_arch=arm64"
   },
   "contributes": {
     "commands": [
