@@ -20,17 +20,16 @@ Apply a profile to a folder or workspace with a single command!
 
 Explanation: 💡 - pending, ⚙️ ️- in progress, ❌ - cancelled, ✅ - done
 
-My thoughts:
+In parentheses are those who proposed this idea:
 
 - 💡 Apply a profile to a set of selected workspaces;
-- ✅ Global profile;
+- ✅ Global profile ([drod3763](https://github.com/evald24/vscode-extensions-profiles/issues/1#issuecomment-895592733), [jlongo](https://github.com/evald24/vscode-extensions-profiles/issues/1#issuecomment-950224588));
 - ✅ Import selected profiles;
-- 💡 Multiple apply of profiles;
-- 💡 After installing new extensions, automatically add to the list of disabled extensions not specified in the profile;
-- 💡 Linking the project to the profile (notification and application of changes when changing the profile);
+- 💡 Multiple (combine) apply of profiles ([lakuapik](https://github.com/evald24/vscode-extensions-profiles/issues/1#issuecomment-876195053));
 - 💡 Recommendations for installing missing extensions;
 - 💡 Convenient management of extensions for a separate project without linking to a profile or creating it;
 - 💡 Create a profile from the current or selected project;
-- ✅ Multiply delete profiles.
+- ✅ Multiply delete profiles;
+- 💡 UI to switch profiles, a dropdown box on the bottom status bar ([dnmalenke](https://github.com/evald24/vscode-extensions-profiles/issues/1#issuecomment-1058163192)).
 
 I invite you to discuss these thoughts and suggestions in this issue: [Do I need additional functionality?](https://github.com/evald24/vscode-extensions-profiles/issues/1)
