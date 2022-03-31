@@ -1,4 +1,14 @@
+<img alt="Logo" src="/assets/icon.png" width="150" />
+
 # Extension profiles for VSCode
+
+![License](https://img.shields.io/github/license/evald24/vscode-extensions-profiles?color=blue)
+![VSCode](https://img.shields.io/badge/VSCode-%5E1.57.0-blue?logo=visual-studio-code)
+![Installs](https://img.shields.io/visual-studio-marketplace/i/evald24.vscode-extension-profiles?color=blue)
+![Downloads](https://img.shields.io/visual-studio-marketplace/d/evald24.vscode-extension-profiles?color=blue)
+![Rating](https://img.shields.io/visual-studio-marketplace/r/evald24.vscode-extension-profiles?color=blue)
+![Version](https://img.shields.io/github/package-json/v/evald24/vscode-extensions-profiles?color=blue)
+![Stars](https://img.shields.io/github/stars/evald24/vscode-extensions-profiles?style=social)
 
 Lets you create profiles to include the selected extensions in the desired project.
 
