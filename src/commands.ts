@@ -117,7 +117,62 @@ export async function createProfile() {
 }
 
 // Copy profile ...
-export async function cloneProfile() {}
+export async function cloneProfile() {
+  const profiles = await getProfileList();
+
+  // set name profile
+  let profileName;
+  let placeHolder = "Come up with a profile name";
+  while (true) {
+    profileName = await vscode.window.showInputBox({ placeHolder, title: "Create new profile" });
+
+    if (profileName && Object.keys(profiles).includes(profileName)) {
+      placeHolder = `The profile \"${profileName}\" already exists, think of another name`;
+      continue; //go next step
+    } else if (profileName && profileName === GLOBAL_PROFILE)
+      placeHolder = 'This profile name is reserved, please use another one';
+    else if (!profileName)
+      return; // close input box
+
+    break;
+  }
+
+  // Get extension list of cache
+  let extensions = await getExtensionList();
+
+  // update if not exist
+  if (Object.keys(extensions).length === 0)
+    extensions = await refreshExtensionList({ isCache: true });
+
+  // create extension list
+  let itemsWorkspace: vscode.QuickPickItem[] = [];
+  for (const key in extensions) {
+    let item = extensions[key];
+    itemsWorkspace.push({
+      label: item.label || key,
+      description: item.label ? key : undefined,
+      detail: item.description || " - - - - - ",
+    });
+  }
+
+  // show and select extensions
+  let selected = await vscode.window.showQuickPick(itemsWorkspace, {
+    canPickMany: true,
+    placeHolder: "The selected extensions will be enabled for the workspace",
+    title: `Select extensions for "${profileName}"`,
+  });
+
+  // set enabled extensions for profile
+  profiles[profileName] = {};
+
+  if (selected)
+    for (const { description: key } of selected)
+      profiles[profileName][key!] = extensions[key!];
+
+  await setGlobalStorageValue("vscodeExtensionProfiles/profiles", profiles);
+
+  return vscode.window.showInformationMessage(`Profile "${profileName}" successfully created!`);
+}
 
 // Edit profile ...
 export async function editProfile() {
