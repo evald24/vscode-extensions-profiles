@@ -120,6 +120,11 @@ export async function createProfile() {
 export async function cloneProfile() {
   const profiles = await getProfileList();
 
+  const selectedProfile = await vscode.window.showQuickPick(Object.keys(profiles))
+  if (!selectedProfile) {
+    return
+  }
+
   // set name profile
   let profileName;
   let placeHolder = "Come up with a profile name";
