@@ -116,6 +116,9 @@ export async function createProfile() {
   return vscode.window.showInformationMessage(`Profile "${profileName}" successfully created!`);
 }
 
+// Copy profile ...
+export async function cloneProfile() {}
+
 // Edit profile ...
 export async function editProfile() {
   // Get and check profiles
