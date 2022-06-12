@@ -144,7 +144,9 @@ export async function cloneProfile() {
 
   // Get extension list of cache
   let extensions = await getExtensionList();
-
+  // Get ExtensionsList from selected profile to use as prefilled selections
+  const preloadedExtensions = profiles[selectedProfile]
+  
   // update if not exist
   if (Object.keys(extensions).length === 0)
     extensions = await refreshExtensionList({ isCache: true });
@@ -154,6 +156,7 @@ export async function cloneProfile() {
   for (const key in extensions) {
     let item = extensions[key];
     itemsWorkspace.push({
+      picked: !!preloadedExtensions[key],
       label: item.label || key,
       description: item.label ? key : undefined,
       detail: item.description || " - - - - - ",
