@@ -1,6 +1,6 @@
 "use strict";
 import * as vscode from "vscode";
-import { applyProfile, createProfile, deleteProfile, editProfile, exportProfile, importProfile, refreshExtensionList } from "./commands";
+import { applyProfile, cloneProfile, createProfile, deleteProfile, editProfile, exportProfile, importProfile, refreshExtensionList } from "./commands";
 import { CommandType } from "./types";
 import { checkGlobalProfile, setEnv } from "./utils";
 
@@ -15,6 +15,7 @@ export async function activate(ctx: vscode.ExtensionContext) {
   ctx.subscriptions.push(
     vscode.commands.registerCommand("vscode-extension-profiles.Refresh" as CommandType, () => refreshExtensionList({})),
     vscode.commands.registerCommand("vscode-extension-profiles.Create" as CommandType, createProfile),
+    vscode.commands.registerCommand("vscode-extension-profiles.Clone" as CommandType, cloneProfile),
     vscode.commands.registerCommand("vscode-extension-profiles.Apply" as CommandType, applyProfile),
     vscode.commands.registerCommand("vscode-extension-profiles.Edit" as CommandType, editProfile),
     vscode.commands.registerCommand("vscode-extension-profiles.Delete" as CommandType, deleteProfile),

@@ -57,6 +57,11 @@
         "shortTitle": "Create profile"
       },
       {
+        "command": "vscode-extension-profiles.Clone",
+        "title": "Extension profiles: Clone profile",
+        "shortTitle": "Clone profile"
+      },
+      {
         "command": "vscode-extension-profiles.Edit",
         "title": "Extension profiles: Edit profile",
         "shortTitle": "Edit profile"
