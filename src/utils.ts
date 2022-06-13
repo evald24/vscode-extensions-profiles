@@ -180,7 +180,7 @@ function sortObjectByKey(obj: any) {
 }
 
 export async function getProfileList() {
-  return sortObjectByKey(await getGlobalStorageValue("vscodeExtensionProfiles/profiles") as ProfileList);
+  return sortObjectByKey(await getGlobalStorageValue("vscodeExtensionProfiles/profiles")) as ProfileList;
 }
 
 export async function getExtensionList() {

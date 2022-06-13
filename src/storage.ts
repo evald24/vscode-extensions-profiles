@@ -54,7 +54,6 @@ export async function setWorkspaceStorageValue(key: "enabled" | "disabled", exte
   return await db.run("INSERT OR REPLACE INTO ItemTable (key, value) VALUES (?, ?)", `extensionsIdentifiers/${key}`, JSON.stringify(extensions));
 }
 
-
 export async function setGlobalStorageValue(key: StorageKey, value: ExtensionList | ProfileList) {
   const db = await open({
     filename: `${process.env.VXP_GLOBAL_STORAGE_PATH}state.vscdb`,

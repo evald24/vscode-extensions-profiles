@@ -2,7 +2,7 @@ import { readFile, writeFile } from "fs/promises";
 import * as vscode from "vscode";
 import { GLOBAL_PROFILE } from "./constans";
 import { setGlobalStorageValue, setWorkspaceStorageValue } from "./storage";
-import { ExtensionList, ExtensionValue } from "./types";
+import { ExtensionList, ExtensionValue, ProfileList } from "./types";
 import { getAllExtensions, getExtensionList, getPathToDocuments, getProfileList } from "./utils";
 
 
@@ -58,25 +58,34 @@ export async function applyProfile() {
   return;
 }
 
-// Create profile ...
-export async function createProfile() {
-  const profiles = await getProfileList();
-
-  // set name profile
+async function getNewProfileName(profiles: ProfileList) {
   let profileName;
+
   let placeHolder = "Come up with a profile name";
   while (true) {
     profileName = await vscode.window.showInputBox({ placeHolder, title: "Create new profile" });
 
     if (profileName && Object.keys(profiles).includes(profileName)) {
       placeHolder = `The profile \"${profileName}\" already exists, think of another name`;
-      continue; //go next step
+      continue; // go next step
     } else if (profileName && profileName === GLOBAL_PROFILE)
       placeHolder = 'This profile name is reserved, please use another one';
     else if (!profileName)
-      return; // close input box
+      return null;
 
     break;
+  }
+
+  return profileName
+}
+
+// Create profile ...
+export async function createProfile() {
+  const profiles = await getProfileList();
+
+  const profileName = await getNewProfileName(profiles)
+  if (profileName === null) {
+    return vscode.window.showInformationMessage(`Creation canceled, you did not specify the profile name!`);
   }
 
   // Get extension list of cache
@@ -89,11 +98,10 @@ export async function createProfile() {
   // create extension list
   let itemsWorkspace: vscode.QuickPickItem[] = [];
   for (const key in extensions) {
-    let item = extensions[key];
     itemsWorkspace.push({
-      label: item.label || key,
-      description: item.label ? key : undefined,
-      detail: item.description || " - - - - - ",
+      label: extensions[key].label || key,
+      description: extensions[key].label ? key : undefined,
+      detail: extensions[key].description || " - - - - - ",
     });
   }
 
@@ -116,37 +124,25 @@ export async function createProfile() {
   return vscode.window.showInformationMessage(`Profile "${profileName}" successfully created!`);
 }
 
-// Copy profile ...
+// Clone profile ...
 export async function cloneProfile() {
   const profiles = await getProfileList();
 
   const selectedProfile = await vscode.window.showQuickPick(Object.keys(profiles))
   if (!selectedProfile) {
-    return
+    return vscode.window.showInformationMessage(`Cloning has been canceled, you have not selected a profile!`);
   }
 
-  // set name profile
-  let profileName;
-  let placeHolder = "Come up with a profile name";
-  while (true) {
-    profileName = await vscode.window.showInputBox({ placeHolder, title: "Create new profile" });
-
-    if (profileName && Object.keys(profiles).includes(profileName)) {
-      placeHolder = `The profile \"${profileName}\" already exists, think of another name`;
-      continue; //go next step
-    } else if (profileName && profileName === GLOBAL_PROFILE)
-      placeHolder = 'This profile name is reserved, please use another one';
-    else if (!profileName)
-      return; // close input box
-
-    break;
+  const profileName = await getNewProfileName(profiles)
+  if (profileName === null) {
+    return vscode.window.showInformationMessage(`Cloning canceled, you did not specify the profile name!`);
   }
 
   // Get extension list of cache
   let extensions = await getExtensionList();
   // Get ExtensionsList from selected profile to use as prefilled selections
   const preloadedExtensions = profiles[selectedProfile]
-  
+
   // update if not exist
   if (Object.keys(extensions).length === 0)
     extensions = await refreshExtensionList({ isCache: true });
@@ -154,12 +150,11 @@ export async function cloneProfile() {
   // create extension list
   let itemsWorkspace: vscode.QuickPickItem[] = [];
   for (const key in extensions) {
-    let item = extensions[key];
     itemsWorkspace.push({
       picked: !!preloadedExtensions[key],
-      label: item.label || key,
-      description: item.label ? key : undefined,
-      detail: item.description || " - - - - - ",
+      label: extensions[key].label || key,
+      description: extensions[key].label ? key : undefined,
+      detail: extensions[key].description || " - - - - - ",
     });
   }
 
@@ -169,6 +164,7 @@ export async function cloneProfile() {
     placeHolder: "The selected extensions will be enabled for the workspace",
     title: `Select extensions for "${profileName}"`,
   });
+
 
   // set enabled extensions for profile
   profiles[profileName] = {};
@@ -238,7 +234,7 @@ export async function editProfile() {
     for (const { description: key } of selected)
       profiles[profileName][key!] = extensions[key!];
   else
-    return;
+    return; // canceled
 
   await setGlobalStorageValue("vscodeExtensionProfiles/profiles", profiles);
   return vscode.window.showInformationMessage(`Profile "${profileName}" successfully updated!`);

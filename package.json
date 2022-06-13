@@ -1,7 +1,7 @@
 {
   "name": "vscode-extension-profiles",
   "displayName": "Extension profiles",
-  "version": "1.1.3",
+  "version": "1.1.4",
   "private": false,
   "description": "Lets you create profiles to include the selected extensions in the desired project.",
   "categories": [
@@ -91,6 +91,7 @@
   "activationEvents": [
     "onCommand:vscode-extension-profiles.Apply",
     "onCommand:vscode-extension-profiles.Create",
+    "onCommand:vscode-extension-profiles.Clone",
     "onCommand:vscode-extension-profiles.Edit",
     "onCommand:vscode-extension-profiles.Delete",
     "onCommand:vscode-extension-profiles.Refresh",
