@@ -22,7 +22,7 @@ export async function applyProfile(ctx: vscode.ExtensionContext) {
   // Generate items
   let itemsProfiles: vscode.QuickPickItem[] = [];
   for (const item in profiles)
-    if(item !== GLOBAL_PROFILE_NAME)
+    if (item !== GLOBAL_PROFILE_NAME)
       itemsProfiles.push({
         label: item,
       });
@@ -57,6 +57,15 @@ export async function applyProfile(ctx: vscode.ExtensionContext) {
   // Set the current profile name
   await ctx.workspaceState.update("profile", profileName)
 
+  try {
+    // Old versions re-read active and disabled extensions when the window is restarted
+    const [major, minor] = vscode.version.split(".")
+    if (major === "1" && Number(minor) < 64) {
+      await vscode.commands.executeCommand("workbench.action.reloadWindow");
+      return
+    }
+  } catch (e) { }
+
   // Set a text status bar
   getStatusBar().text = `$(extensions) Please restart VSCode`
 
@@ -75,9 +84,6 @@ export async function applyProfile(ctx: vscode.ExtensionContext) {
   } else {
     await vscode.window.showInformationMessage("Please restart VSCode")
   }
-
-  // Reloading the window to apply extensions
-  // vscode.commands.executeCommand("workbench.action.reloadWindow");
 
   return;
 }
@@ -259,7 +265,7 @@ export async function editProfile(ctx: vscode.ExtensionContext) {
   else
     return; // canceled
 
-  await setGlobalStateValue(ctx,"profiles", profiles);
+  await setGlobalStateValue(ctx, "profiles", profiles);
   return vscode.window.showInformationMessage(`Profile "${profileName}" successfully updated!`);
 }
 
@@ -289,8 +295,8 @@ export async function deleteProfile(ctx: vscode.ExtensionContext) {
     deletedProfiles.push(label);
   }
 
-  await setGlobalStateValue(ctx,"profiles", profiles);
-  return vscode.window.showInformationMessage(`Profile${deletedProfiles.length > 1 ? "s": ""} "${deletedProfiles.join(", ")}" successfully deleted!`);
+  await setGlobalStateValue(ctx, "profiles", profiles);
+  return vscode.window.showInformationMessage(`Profile${deletedProfiles.length > 1 ? "s" : ""} "${deletedProfiles.join(", ")}" successfully deleted!`);
 }
 
 // Export a profile...
