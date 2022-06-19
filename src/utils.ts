@@ -299,6 +299,6 @@ export async function setEnv(ctx: vscode.ExtensionContext) {
       for (const folder of folders) uriFolders.push(folder.uri);
       process.env.VXP_WORKSPACE_STORAGE_UUID = await getPathWorkspacesUUID(uriFolders);
     } else process.env.VXP_WORKSPACE_STORAGE_UUID = await getPathUserWorkspaceStorageUUID(folders[0].uri);
-    process.env.VXP_WORKSPACE_STORAGE_PATH_UUID = `${process.env.VXP_WORKSPACE_STORAGE_PATH}${process.env.VXP_WORKSPACE_STORAGE_UUID}${PLATFORM_SLASH}`;
+    process.env.VXP_WORKSPACE_STORAGE_PATH_UUID = `${process.env.VXP_WORKSPACE_STORAGE_PATH}${PLATFORM_SLASH}${process.env.VXP_WORKSPACE_STORAGE_UUID}${PLATFORM_SLASH}`;
   }
 }

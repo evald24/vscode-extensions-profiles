@@ -50,9 +50,16 @@ export async function applyProfile(ctx: vscode.ExtensionContext) {
       disabledList.push(item);
   }
 
-  // Saving extensions for the workspace
-  await setWorkspaceStorageValue("enabled", enabledList);
-  await setWorkspaceStorageValue("disabled", disabledList);
+  try {
+    // Saving extensions for the workspace
+    await setWorkspaceStorageValue("enabled", enabledList);
+    await setWorkspaceStorageValue("disabled", disabledList);
+  }
+  catch (e) {
+    await vscode.window.showErrorMessage((e as Error).message)
+    console.error(e)
+    return
+  }
 
   // Set the current profile name
   await ctx.workspaceState.update("profile", profileName)
@@ -62,7 +69,7 @@ export async function applyProfile(ctx: vscode.ExtensionContext) {
 
   // Show information about mandatory restart
   if (!ctx.globalState.get<boolean>("isHideMessageRestart")) {
-    const result = await vscode.window.showInformationMessage(
+    const result = await vscode.window.showWarningMessage(
       "With the recent update of VSCode, the process of restarting extensions based on the workspace has changed and now requires a full restart of VSCode. Now I'm thinking about how it would be possible to apply the profile without a full reboot, if you know or have suggestions on how to improve the behavior of the extension, please create an issue",
       "Don't show again",
       "More",
@@ -72,6 +79,8 @@ export async function applyProfile(ctx: vscode.ExtensionContext) {
     } else if (result === "Don't show again") {
       ctx.globalState.update("isHideMessageRestart", true);
     }
+  } else {
+    await vscode.window.showInformationMessage("Please restart VSCode")
   }
 
   // Reloading the window to apply extensions
