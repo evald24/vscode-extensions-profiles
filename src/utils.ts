@@ -1,8 +1,8 @@
 import { homedir } from "os";
 import { promisify } from "util";
 import * as vscode from "vscode";
-import { GLOBAL_PROFILE, PLATFORM_SLASH } from "./constans";
-import { getGlobalStorageValue, setGlobalStorageValue } from "./storage";
+import { GLOBAL_PROFILE_NAME, PLATFORM_SLASH } from "./constans";
+import { getGlobalStateValue, getGlobalStorageValue, setGlobalStateValue } from "./storage";
 import { ExtensionList, ExtensionValue, PackageJson, ProfileList } from "./types";
 
 import path = require("path");
@@ -179,12 +179,20 @@ function sortObjectByKey(obj: any) {
   );
 }
 
-export async function getProfileList() {
-  return sortObjectByKey(await getGlobalStorageValue("vscodeExtensionProfiles/profiles")) as ProfileList;
+export async function getProfiles(ctx: vscode.ExtensionContext) {
+  let data = await getGlobalStateValue(ctx, "profiles");
+
+  // copy old state
+  if (Object.keys(data).length === 0) {
+    data = await getGlobalStorageValue("vscodeExtensionProfiles/profiles");
+    await setGlobalStateValue(ctx, "profiles", data);
+  }
+
+  return sortObjectByKey(data) as ProfileList;
 }
 
-export async function getExtensionList() {
-  return (await getGlobalStorageValue("vscodeExtensionProfiles/extensions")) as ExtensionList;
+export async function getExtensions(ctx: vscode.ExtensionContext) {
+  return (await getGlobalStateValue(ctx, "extensions")) as ExtensionList;
 }
 
 export function loadJSON(path: string) {
@@ -267,17 +275,16 @@ export function getPathToDocuments(profileName?: string): vscode.Uri {
 /**
  *  Check if a global profile exists. It will create one if there isn't any.
  */
-export async function checkGlobalProfile() {
-  const profiles = await getProfileList();
-  if (profiles[GLOBAL_PROFILE] === undefined)
-    profiles[GLOBAL_PROFILE] = {};
+export async function checkGlobalProfile(ctx: vscode.ExtensionContext) {
+  const profiles = await getProfiles(ctx);
+  if (profiles[GLOBAL_PROFILE_NAME] === undefined)
+    profiles[GLOBAL_PROFILE_NAME] = {};
 
-  await setGlobalStorageValue("vscodeExtensionProfiles/profiles", profiles);
+  await setGlobalStateValue(ctx,"profiles", profiles);
 }
 
 // Set environments from context
 export async function setEnv(ctx: vscode.ExtensionContext) {
-
   // Set global storage path
   process.env.VXP_GLOBAL_STORAGE_PATH = path.join(ctx.globalStorageUri.path, "../").replace(/^\\/, "");
 
@@ -292,7 +299,6 @@ export async function setEnv(ctx: vscode.ExtensionContext) {
       for (const folder of folders) uriFolders.push(folder.uri);
       process.env.VXP_WORKSPACE_STORAGE_UUID = await getPathWorkspacesUUID(uriFolders);
     } else process.env.VXP_WORKSPACE_STORAGE_UUID = await getPathUserWorkspaceStorageUUID(folders[0].uri);
-    process.env.VXP_WORKSPACE_STORAGE_PATH_UUID = `${process.env.VXP_WORKSPACE_STORAGE_PATH}${PLATFORM_SLASH}${process.env.VXP_WORKSPACE_STORAGE_UUID}${PLATFORM_SLASH}`;
+    process.env.VXP_WORKSPACE_STORAGE_PATH_UUID = `${process.env.VXP_WORKSPACE_STORAGE_PATH}${process.env.VXP_WORKSPACE_STORAGE_UUID}${PLATFORM_SLASH}`;
   }
-
 }

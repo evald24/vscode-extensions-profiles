@@ -1,7 +1,7 @@
 import { open } from "sqlite";
 import * as sqlite3 from "sqlite3";
 import * as vscode from "vscode";
-import { ExtensionList, ExtensionValue, ProfileList, StorageKey, StorageValue } from "./types";
+import { ExtensionList, ExtensionValue, ProfileList, StorageKey, StorageKeyID, StorageValue } from "./types";
 
 
 
@@ -54,15 +54,9 @@ export async function setWorkspaceStorageValue(key: "enabled" | "disabled", exte
   return await db.run("INSERT OR REPLACE INTO ItemTable (key, value) VALUES (?, ?)", `extensionsIdentifiers/${key}`, JSON.stringify(extensions));
 }
 
-export async function setGlobalStorageValue(key: StorageKey, value: ExtensionList | ProfileList) {
-  const db = await open({
-    filename: `${process.env.VXP_GLOBAL_STORAGE_PATH}state.vscdb`,
-    driver: sqlite3.Database,
-  });
-
-  return await db.run("INSERT OR REPLACE INTO ItemTable (key, value) VALUES (?, ?)", key, JSON.stringify(value));
-}
-
+/**
+ * @deprecated use getGlobalStateValue
+ */
 export async function getGlobalStorageValue(key: StorageKey): Promise<ExtensionList | ProfileList> {
   const db = await open({
     filename: `${process.env.VXP_GLOBAL_STORAGE_PATH}state.vscdb`,
@@ -73,5 +67,15 @@ export async function getGlobalStorageValue(key: StorageKey): Promise<ExtensionL
 
   if (data?.value) return JSON.parse(data.value);
 
+  return {}; // default
+}
+
+export async function setGlobalStateValue(ctx: vscode.ExtensionContext, key: StorageKeyID, value: ExtensionList | ProfileList) {
+  return ctx.globalState.update(key, value);
+}
+
+export async function getGlobalStateValue(ctx: vscode.ExtensionContext, key: StorageKeyID): Promise<ExtensionList | ProfileList> {
+  const data = ctx.globalState.get<ExtensionList | ProfileList>(key);
+  if (data !== undefined) return data;
   return {}; // default
 }

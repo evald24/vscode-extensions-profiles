@@ -1,6 +1,7 @@
 "use strict";
 import * as vscode from "vscode";
 import { applyProfile, cloneProfile, createProfile, deleteProfile, editProfile, exportProfile, importProfile, refreshExtensionList } from "./commands";
+import { createStatusBarItem } from "./status-bar";
 import { CommandType } from "./types";
 import { checkGlobalProfile, setEnv } from "./utils";
 
@@ -9,21 +10,22 @@ export async function activate(ctx: vscode.ExtensionContext) {
   setEnv(ctx);
 
   // Refreshing the list of extensions after startup
-  refreshExtensionList({ isCache: true });
+  refreshExtensionList(ctx, { isCache: true });
 
   // Registration commands
   ctx.subscriptions.push(
-    vscode.commands.registerCommand("vscode-extension-profiles.Refresh" as CommandType, () => refreshExtensionList({})),
-    vscode.commands.registerCommand("vscode-extension-profiles.Create" as CommandType, createProfile),
-    vscode.commands.registerCommand("vscode-extension-profiles.Clone" as CommandType, cloneProfile),
-    vscode.commands.registerCommand("vscode-extension-profiles.Apply" as CommandType, applyProfile),
-    vscode.commands.registerCommand("vscode-extension-profiles.Edit" as CommandType, editProfile),
-    vscode.commands.registerCommand("vscode-extension-profiles.Delete" as CommandType, deleteProfile),
-    vscode.commands.registerCommand("vscode-extension-profiles.Export" as CommandType, exportProfile),
-    vscode.commands.registerCommand("vscode-extension-profiles.Import" as CommandType, importProfile),
+    vscode.commands.registerCommand("vscode-extension-profiles.Refresh" as CommandType, () => refreshExtensionList(ctx, {})),
+    vscode.commands.registerCommand("vscode-extension-profiles.Create" as CommandType, () => createProfile(ctx)),
+    vscode.commands.registerCommand("vscode-extension-profiles.Clone" as CommandType, () => cloneProfile(ctx)),
+    vscode.commands.registerCommand("vscode-extension-profiles.Apply" as CommandType, () => applyProfile(ctx)),
+    vscode.commands.registerCommand("vscode-extension-profiles.Edit" as CommandType, () => editProfile(ctx)),
+    vscode.commands.registerCommand("vscode-extension-profiles.Delete" as CommandType, () => deleteProfile(ctx)),
+    vscode.commands.registerCommand("vscode-extension-profiles.Export" as CommandType, () => exportProfile(ctx)),
+    vscode.commands.registerCommand("vscode-extension-profiles.Import" as CommandType, () => importProfile(ctx)),
+    createStatusBarItem("vscode-extension-profiles.Apply", ctx),
   );
 
-  await checkGlobalProfile();
+  await checkGlobalProfile(ctx);
 }
 
 export function deactivate() {}
