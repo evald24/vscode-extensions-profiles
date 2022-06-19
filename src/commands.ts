@@ -50,16 +50,9 @@ export async function applyProfile(ctx: vscode.ExtensionContext) {
       disabledList.push(item);
   }
 
-  try {
-    // Saving extensions for the workspace
-    await setWorkspaceStorageValue("enabled", enabledList);
-    await setWorkspaceStorageValue("disabled", disabledList);
-  }
-  catch (e) {
-    await vscode.window.showErrorMessage((e as Error).message)
-    console.error(e)
-    return
-  }
+  // Saving extensions for the workspace
+  await setWorkspaceStorageValue("enabled", enabledList);
+  await setWorkspaceStorageValue("disabled", disabledList);
 
   // Set the current profile name
   await ctx.workspaceState.update("profile", profileName)

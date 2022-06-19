@@ -283,13 +283,20 @@ export async function checkGlobalProfile(ctx: vscode.ExtensionContext) {
   await setGlobalStateValue(ctx,"profiles", profiles);
 }
 
+export const environment = {
+  GLOBAL_STORAGE_PATH: "",
+  WORKSPACE_STORAGE_PATH: "",
+  WORKSPACE_STORAGE_UUID: "",
+  WORKSPACE_STORAGE_PATH_UUID: "",
+}
+
 // Set environments from context
 export async function setEnv(ctx: vscode.ExtensionContext) {
   // Set global storage path
-  process.env.VXP_GLOBAL_STORAGE_PATH = path.join(ctx.globalStorageUri.path, "../").replace(/^\\/, "");
+  environment.GLOBAL_STORAGE_PATH = path.join(ctx.globalStorageUri.path, "../").replace(/^\\/, "");
 
   // Set workspace storage path
-  if (ctx.storageUri) process.env.VXP_WORKSPACE_STORAGE_PATH = path.join(ctx.storageUri.path, "../../").replace(/^\\/, "");
+  if (ctx.storageUri) environment.WORKSPACE_STORAGE_PATH = path.join(ctx.storageUri.path, "../../").replace(/^\\/, "");
 
   // Set workspace storage UUID
   let folders = vscode.workspace.workspaceFolders;
@@ -297,8 +304,8 @@ export async function setEnv(ctx: vscode.ExtensionContext) {
     if (folders.length > 1) {
       let uriFolders: vscode.Uri[] = [];
       for (const folder of folders) uriFolders.push(folder.uri);
-      process.env.VXP_WORKSPACE_STORAGE_UUID = await getPathWorkspacesUUID(uriFolders);
-    } else process.env.VXP_WORKSPACE_STORAGE_UUID = await getPathUserWorkspaceStorageUUID(folders[0].uri);
-    process.env.VXP_WORKSPACE_STORAGE_PATH_UUID = `${process.env.VXP_WORKSPACE_STORAGE_PATH}${PLATFORM_SLASH}${process.env.VXP_WORKSPACE_STORAGE_UUID}${PLATFORM_SLASH}`;
+      environment.WORKSPACE_STORAGE_UUID = await getPathWorkspacesUUID(uriFolders);
+    } else environment.WORKSPACE_STORAGE_UUID = await getPathUserWorkspaceStorageUUID(folders[0].uri);
   }
+  environment.WORKSPACE_STORAGE_PATH_UUID = `${environment.WORKSPACE_STORAGE_PATH}${PLATFORM_SLASH}${environment.WORKSPACE_STORAGE_UUID}${PLATFORM_SLASH}`.replace("//", "/");
 }

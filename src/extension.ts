@@ -7,7 +7,7 @@ import { checkGlobalProfile, setEnv } from "./utils";
 
 export async function activate(ctx: vscode.ExtensionContext) {
   // Set environments
-  setEnv(ctx);
+  await setEnv(ctx);
 
   // Refreshing the list of extensions after startup
   refreshExtensionList(ctx, { isCache: true });

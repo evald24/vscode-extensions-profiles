@@ -2,20 +2,19 @@ import { open } from "sqlite";
 import * as sqlite3 from "sqlite3";
 import * as vscode from "vscode";
 import { ExtensionList, ExtensionValue, ProfileList, StorageKey, StorageKeyID, StorageValue } from "./types";
-
-
+import { environment } from "./utils";
 
 //
 export async function getDisabledExtensionsGlobalStorage() {
   const db = await open({
-    filename: `${process.env.VXP_GLOBAL_STORAGE_PATH}state.vscdb`,
+    filename: `${environment.GLOBAL_STORAGE_PATH}state.vscdb`,
     driver: sqlite3.Database,
   });
 
   let data = (await db.get("SELECT key, value FROM ItemTable WHERE key = ?", "extensionsIdentifiers/disabled")) as StorageValue || undefined;
 
   if (data?.value) return JSON.parse(data.value) as ExtensionValue[];
-
+  await db.close()
   return []; // default
 }
 
@@ -34,24 +33,25 @@ export function getEnabledExtensions() {
 
 export async function getWorkspaceStorageValue(key: "enabled" | "disabled") {
   const db = await open({
-    filename: `${process.env.VXP_WORKSPACE_STORAGE_PATH_UUID}state.vscdb`,
+    filename: `${environment.WORKSPACE_STORAGE_PATH_UUID}state.vscdb`,
     driver: sqlite3.Database,
   });
 
   let data = (await db.get("SELECT key, value FROM ItemTable WHERE key = ?", `extensionsIdentifiers/${key}`)) as StorageValue;
 
   if (data?.value) return JSON.parse(data.value) as ExtensionValue[];
-
+  await db.close()
   return []; // default
 }
 
 export async function setWorkspaceStorageValue(key: "enabled" | "disabled", extensions: ExtensionValue[]) {
   const db = await open({
-    filename: `${process.env.VXP_WORKSPACE_STORAGE_PATH_UUID}state.vscdb`,
+    filename: `${environment.WORKSPACE_STORAGE_PATH_UUID}state.vscdb`,
     driver: sqlite3.Database,
   });
 
-  return await db.run("INSERT OR REPLACE INTO ItemTable (key, value) VALUES (?, ?)", `extensionsIdentifiers/${key}`, JSON.stringify(extensions));
+  await db.run("INSERT OR REPLACE INTO ItemTable (key, value) VALUES (?, ?)", `extensionsIdentifiers/${key}`, JSON.stringify(extensions));
+  return await db.close()
 }
 
 /**
@@ -59,11 +59,12 @@ export async function setWorkspaceStorageValue(key: "enabled" | "disabled", exte
  */
 export async function getGlobalStorageValue(key: StorageKey): Promise<ExtensionList | ProfileList> {
   const db = await open({
-    filename: `${process.env.VXP_GLOBAL_STORAGE_PATH}state.vscdb`,
+    filename: `${environment.GLOBAL_STORAGE_PATH}state.vscdb`,
     driver: sqlite3.Database,
   });
 
   let data = (await db.get("SELECT key, value FROM ItemTable WHERE key = ?", key)) as StorageValue;
+  await db.close();
 
   if (data?.value) return JSON.parse(data.value);
 
@@ -71,7 +72,7 @@ export async function getGlobalStorageValue(key: StorageKey): Promise<ExtensionL
 }
 
 export async function setGlobalStateValue(ctx: vscode.ExtensionContext, key: StorageKeyID, value: ExtensionList | ProfileList) {
-  return ctx.globalState.update(key, value);
+  return await ctx.globalState.update(key, value);
 }
 
 export async function getGlobalStateValue(ctx: vscode.ExtensionContext, key: StorageKeyID): Promise<ExtensionList | ProfileList> {
