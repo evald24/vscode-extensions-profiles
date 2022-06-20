@@ -2,11 +2,11 @@ export type StorageValue = { key: string; value: string };
 export type ExtensionValue = { id: string; uuid: string; label?: string; description?: string };
 
 export type CommandType =
-  "vscode-extension-profiles.Refresh" |
-  "vscode-extension-profiles.Create" |
-  "vscode-extension-profiles.Edit" |
-  "vscode-extension-profiles.Apply" |
-  "vscode-extension-profiles.Delete";
+  | "vscode-extension-profiles.Refresh"
+  | "vscode-extension-profiles.Create"
+  | "vscode-extension-profiles.Edit"
+  | "vscode-extension-profiles.Apply"
+  | "vscode-extension-profiles.Delete";
 
 export type ProfileList = {
   [key: string]: ExtensionList;
@@ -21,18 +21,18 @@ export type ExtensionList = {
 };
 
 export type PackageJson = {
-  "name": string,
-  "displayName": string,
-  "description": string,
-  "version": string,
-  "publisher": string,
-  "__metadata": {
-    "id": string,
-    "publisherId": string,
-    "publisherDisplayName": string,
-    "installedTimestamp": number
-  },
-  [key: string]: any
+  name: string;
+  displayName: string;
+  description: string;
+  version: string;
+  publisher: string;
+  __metadata: {
+    id: string;
+    publisherId: string;
+    publisherDisplayName: string;
+    installedTimestamp: number;
+  };
+  [key: string]: any;
 };
 
 export type StorageKey = `vscodeExtensionProfiles/${StorageKeyID}`;

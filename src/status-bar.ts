@@ -11,8 +11,11 @@ export function createStatusBarItem(comandID: CommandType, ctx: vscode.Extension
   statusBarItem.tooltip = "Select and apply profile";
 
   let profileName = ctx.workspaceState.get<string>("profile");
-  if (!!profileName) statusBarItem.text = `$(extensions) ${profileName}`;
-  else statusBarItem.text = "$(extensions) Select a profile";
+  if (!!profileName) {
+    statusBarItem.text = `$(extensions) ${profileName}`;
+  } else {
+    statusBarItem.text = "$(extensions) Select a profile";
+  }
 
   statusBarItem.show();
   return statusBarItem;

@@ -22,7 +22,7 @@ export async function activate(ctx: vscode.ExtensionContext) {
     vscode.commands.registerCommand("vscode-extension-profiles.Delete" as CommandType, () => deleteProfile(ctx)),
     vscode.commands.registerCommand("vscode-extension-profiles.Export" as CommandType, () => exportProfile(ctx)),
     vscode.commands.registerCommand("vscode-extension-profiles.Import" as CommandType, () => importProfile(ctx)),
-    createStatusBarItem("vscode-extension-profiles.Apply", ctx),
+    createStatusBarItem("vscode-extension-profiles.Apply", ctx)
   );
 
   await checkGlobalProfile(ctx);

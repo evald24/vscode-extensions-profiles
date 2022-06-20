@@ -40,6 +40,6 @@ In parentheses are those who proposed this idea:
 - 💡 Convenient management of extensions for a separate project without linking to a profile or creating it;
 - 💡 Create a profile from the current or selected project;
 - ✅ Multiply delete profiles;
-- 💡 UI to switch profiles, a dropdown box on the bottom status bar ([dnmalenke](https://github.com/evald24/vscode-extensions-profiles/issues/1#issuecomment-1058163192)).
+- ✅ UI to switch profiles, a dropdown box on the bottom status bar ([dnmalenke](https://github.com/evald24/vscode-extensions-profiles/issues/1#issuecomment-1058163192)).
 
 I invite you to discuss these thoughts and suggestions in this issue: [Do I need additional functionality?](https://github.com/evald24/vscode-extensions-profiles/issues/1)

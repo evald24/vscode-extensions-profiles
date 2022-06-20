@@ -11,10 +11,12 @@ export async function getDisabledExtensionsGlobalStorage() {
     driver: sqlite3.Database,
   });
 
-  let data = (await db.get("SELECT key, value FROM ItemTable WHERE key = ?", "extensionsIdentifiers/disabled")) as StorageValue || undefined;
+  const data = ((await db.get("SELECT key, value FROM ItemTable WHERE key = ?", "extensionsIdentifiers/disabled")) as StorageValue) || undefined;
+  await db.close();
 
-  if (data?.value) return JSON.parse(data.value) as ExtensionValue[];
-  await db.close()
+  if (data?.value) {
+    return JSON.parse(data.value) as ExtensionValue[];
+  }
   return []; // default
 }
 
@@ -23,12 +25,15 @@ export async function getDisabledExtensionsGlobalStorage() {
 export function getEnabledExtensions() {
   return vscode.extensions.all
     .filter((e) => !/.*(?:\\\\|\/)resources(?:\\\\|\/)app(?:\\\\|\/)extensions(?:\\\\|\/).*/i.test(e.extensionPath)) // ignore internal extensions
-    .map(item => ({
-      id: item.id,
-      uuid: item?.packageJSON.uuid,
-      label: item?.packageJSON.displayName,
-      description: item?.packageJSON.description
-    }) as ExtensionValue);
+    .map(
+      (item) =>
+        ({
+          id: item.id,
+          uuid: item?.packageJSON.uuid,
+          label: item?.packageJSON.displayName,
+          description: item?.packageJSON.description,
+        } as ExtensionValue)
+    );
 }
 
 export async function getWorkspaceStorageValue(key: "enabled" | "disabled") {
@@ -38,9 +43,11 @@ export async function getWorkspaceStorageValue(key: "enabled" | "disabled") {
   });
 
   let data = (await db.get("SELECT key, value FROM ItemTable WHERE key = ?", `extensionsIdentifiers/${key}`)) as StorageValue;
+  await db.close();
 
-  if (data?.value) return JSON.parse(data.value) as ExtensionValue[];
-  await db.close()
+  if (data?.value) {
+    return JSON.parse(data.value) as ExtensionValue[];
+  }
   return []; // default
 }
 
@@ -51,7 +58,7 @@ export async function setWorkspaceStorageValue(key: "enabled" | "disabled", exte
   });
 
   await db.run("INSERT OR REPLACE INTO ItemTable (key, value) VALUES (?, ?)", `extensionsIdentifiers/${key}`, JSON.stringify(extensions));
-  return await db.close()
+  return await db.close();
 }
 
 /**
@@ -66,8 +73,9 @@ export async function getGlobalStorageValue(key: StorageKey): Promise<ExtensionL
   let data = (await db.get("SELECT key, value FROM ItemTable WHERE key = ?", key)) as StorageValue;
   await db.close();
 
-  if (data?.value) return JSON.parse(data.value);
-
+  if (data?.value) {
+    return JSON.parse(data.value);
+  }
   return {}; // default
 }
 
@@ -77,6 +85,8 @@ export async function setGlobalStateValue(ctx: vscode.ExtensionContext, key: Sto
 
 export async function getGlobalStateValue(ctx: vscode.ExtensionContext, key: StorageKeyID): Promise<ExtensionList | ProfileList> {
   const data = ctx.globalState.get<ExtensionList | ProfileList>(key);
-  if (data !== undefined) return data;
+  if (data !== undefined) {
+    return data;
+  }
   return {}; // default
 }

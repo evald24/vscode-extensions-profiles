@@ -10,7 +10,6 @@ import fs = require("fs");
 const readdir = promisify(fs.readdir);
 const stat = promisify(fs.stat);
 
-
 // VSCode path in different OS
 // https://code.visualstudio.com/docs/setup/setup-overview#_how-can-i-do-a-clean-uninstall-of-vs-code
 export function getVSCodePath(): string {
@@ -40,19 +39,28 @@ export function getExtensionsPath(): string {
 
 // User workspace storage
 export function getUserWorkspaceStoragePath(): string {
-  if (process.platform === "win32") return `${getVSCodePath()}\\User\\workspaceStorage`;
-  else return `${getVSCodePath()}/User/workspaceStorage`;
+  if (process.platform === "win32") {
+    return `${getVSCodePath()}\\User\\workspaceStorage`;
+  } else {
+    return `${getVSCodePath()}/User/workspaceStorage`;
+  }
 }
 // Workspaces
 export function getWorkspacesPath(): string {
-  if (process.platform === "win32") return `${getVSCodePath()}\\Workspaces`;
-  else return `${getVSCodePath()}/Workspaces`;
+  if (process.platform === "win32") {
+    return `${getVSCodePath()}\\Workspaces`;
+  } else {
+    return `${getVSCodePath()}/Workspaces`;
+  }
 }
 
 // User global storage
 export function getUserGlobalStoragePath(): string {
-  if (process.platform === "win32") return `${getVSCodePath()}\\User\\globalStorage`;
-  else return `${getVSCodePath()}/User/globalStorage`;
+  if (process.platform === "win32") {
+    return `${getVSCodePath()}\\User\\globalStorage`;
+  } else {
+    return `${getVSCodePath()}/User/globalStorage`;
+  }
 }
 
 export async function getPathUserWorkspaceStorageUUID(uriWorkspace: vscode.Uri): Promise<string> {
@@ -79,10 +87,13 @@ async function getFiles(dir: string, pattern: string): Promise<string[]> {
   const files = await Promise.all(
     subdirs.map(async (subdir: string) => {
       const res = path.resolve(dir, subdir);
-      if ((await stat(res)).isDirectory()) return await getFiles(res, pattern);
-      else if (res.substr(-1 * pattern.length) === pattern) return res;
+      if ((await stat(res)).isDirectory()) {
+        return await getFiles(res, pattern);
+      } else if (res.substr(-1 * pattern.length) === pattern) {
+        return res;
+      }
       return undefined;
-    }),
+    })
   ).then((allData) => allData.filter((x) => x !== undefined));
   return files.reduce((a: any, f: any) => a.concat(f), []) as Promise<string[]>;
 }
@@ -91,23 +102,31 @@ async function searchFolderUserWorkspaceStorage(files: string[], uriWorkspace: v
   return await Promise.all(
     files.map(async (filePath: string) => {
       try {
-        if (!fs.existsSync(filePath))
+        if (!fs.existsSync(filePath)) {
           return undefined;
-
+        }
 
         let { folder, workspace }: { folder?: string; workspace?: string } = loadJSON(filePath);
         if (process.platform === "win32") {
-          if (folder && folder.replace("%3A", ":").toLocaleLowerCase() === fileUrl(uriWorkspace).toLocaleLowerCase()) return filePath;
-          if (workspace && workspace.replace("%3A", ":").toLocaleLowerCase() === fileUrl(uriWorkspace).toLocaleLowerCase()) return filePath;
+          if (folder && folder.replace("%3A", ":").toLocaleLowerCase() === fileUrl(uriWorkspace).toLocaleLowerCase()) {
+            return filePath;
+          }
+          if (workspace && workspace.replace("%3A", ":").toLocaleLowerCase() === fileUrl(uriWorkspace).toLocaleLowerCase()) {
+            return filePath;
+          }
         } else {
-          if (folder && folder === fileUrl(uriWorkspace)) return filePath;
-          if (workspace && workspace === fileUrl(uriWorkspace)) return filePath;
+          if (folder && folder === fileUrl(uriWorkspace)) {
+            return filePath;
+          }
+          if (workspace && workspace === fileUrl(uriWorkspace)) {
+            return filePath;
+          }
         }
       } catch (e) {
         console.error(e);
       }
       return undefined;
-    }),
+    })
   ).then((allData) => allData.filter((x) => x !== undefined));
 }
 
@@ -117,53 +136,61 @@ async function searchWorkspaces(files: string[], uriFolders: vscode.Uri[]) {
   return await Promise.all(
     files.map(async (filePath: string) => {
       try {
-        if (!fs.existsSync(filePath))
+        if (!fs.existsSync(filePath)) {
           return undefined;
+        }
 
         let data: { folders?: Array<{ path: string }>; workspace?: string } = loadJSON(filePath);
 
         if (typeof data.workspace !== "undefined") {
           let fsPathWorkspace = vscode.Uri.parse(path.resolve(data.workspace.replace("file://", ""))).fsPath;
 
-          if (process.platform === "win32") fsPathWorkspace = fsPathWorkspace.slice(1, fsPathWorkspace.length);
-          if (!fs.existsSync(fsPathWorkspace)) return undefined;
+          if (process.platform === "win32") {
+            fsPathWorkspace = fsPathWorkspace.slice(1, fsPathWorkspace.length);
+          }
+          if (!fs.existsSync(fsPathWorkspace)) {
+            return undefined;
+          }
 
           data = loadJSON(fsPathWorkspace);
-          for (const item of data.folders!)
+          for (const item of data.folders!) {
             item.path = path.join(path.dirname(fsPathWorkspace), item.path);
-
+          }
         }
 
         if (typeof data.folders !== "undefined") {
           let i = 0;
           for (const { path: relativePath } of data.folders) {
             const fsPath = path.resolve(relativePath);
-            if (folders.includes(process.platform === "win32" ? fsPath.toLocaleLowerCase() : fsPath))
+            if (folders.includes(process.platform === "win32" ? fsPath.toLocaleLowerCase() : fsPath)) {
               i++;
+            }
           }
-          if (i === folders.length) return filePath;
+          if (i === folders.length) {
+            return filePath;
+          }
         }
       } catch (e) {
         console.error(e);
       }
       return undefined;
-    }),
+    })
   ).then((allData) => allData.filter((x) => x !== undefined));
 }
 
 export function fileUrl(filePath: vscode.Uri, options: any = { resolve: true }) {
   let pathName = filePath.fsPath;
 
-  if (options.resolve)
+  if (options.resolve) {
     pathName = path.resolve(filePath.fsPath);
-
+  }
 
   pathName = pathName.replace(/\\/g, "/");
 
   // Windows drive letter must be prefixed with a slash.
-  if (pathName[0] !== "/")
+  if (pathName[0] !== "/") {
     pathName = `/${pathName}`;
-
+  }
 
   // Escape required characters for path components.
   // See: https://tools.ietf.org/html/rfc3986#section-3.3
@@ -171,12 +198,12 @@ export function fileUrl(filePath: vscode.Uri, options: any = { resolve: true }) 
 }
 
 function sortObjectByKey(obj: any) {
-  return Object.keys(obj).sort().reduce(
-    (result: any, key) => {
+  return Object.keys(obj)
+    .sort()
+    .reduce((result: any, key) => {
       result[key] = obj[key];
       return result;
-    }, {}
-  );
+    }, {});
 }
 
 export async function getProfiles(ctx: vscode.ExtensionContext) {
@@ -204,8 +231,9 @@ export async function getAllExtensions() {
   let extensions: ExtensionValue[] = [];
   let obsolete: string[] = []; // default value
 
-  if (fs.existsSync(extPath + ".obsolete"))
+  if (fs.existsSync(extPath + ".obsolete")) {
     obsolete = Object.keys(loadJSON(extPath + ".obsolete"));
+  }
 
   let all = await readdir(extPath);
 
@@ -223,11 +251,13 @@ export async function getAllExtensions() {
             description: info.description,
           };
 
-          if (/^%.*%$/igm.test(extInfo.label))
+          if (/^%.*%$/gim.test(extInfo.label)) {
             extInfo.label = getExtensionLocaleValue(extPath + name + PLATFORM_SLASH, extInfo.label);
+          }
 
-          if (/^%.*%$/igm.test(extInfo.description))
+          if (/^%.*%$/gim.test(extInfo.description)) {
             extInfo.description = getExtensionLocaleValue(extPath + name + PLATFORM_SLASH, extInfo.description);
+          }
 
           extensions.push(extInfo);
         } catch (e) {
@@ -235,13 +265,17 @@ export async function getAllExtensions() {
           console.warn(e);
         }
       }
-    }),
+    })
   );
 
   return extensions.sort((a: any, b: any) => {
-    if (a.label > b.label) return -1;
-    else if (a.label < b.label) return 1;
-    else return 0;
+    if (a.label > b.label) {
+      return -1;
+    } else if (a.label < b.label) {
+      return 1;
+    } else {
+      return 0;
+    }
   });
 }
 
@@ -251,8 +285,9 @@ export function getExtensionLocaleValue(extPath: string, key: string): string {
   const defaultPath = `${extPath}${PLATFORM_SLASH}package.nls.json`;
   const languagePath = `${extPath}${PLATFORM_SLASH}package.nls.${language}.json`;
 
-  if (fs.existsSync(languagePath))
+  if (fs.existsSync(languagePath)) {
     return require(languagePath)[key.replace(/%/g, "")];
+  }
 
   try {
     return require(defaultPath)[key.replace(/%/g, "")];
@@ -277,10 +312,11 @@ export function getPathToDocuments(profileName?: string): vscode.Uri {
  */
 export async function checkGlobalProfile(ctx: vscode.ExtensionContext) {
   const profiles = await getProfiles(ctx);
-  if (profiles[GLOBAL_PROFILE_NAME] === undefined)
+  if (profiles[GLOBAL_PROFILE_NAME] === undefined) {
     profiles[GLOBAL_PROFILE_NAME] = {};
+  }
 
-  await setGlobalStateValue(ctx,"profiles", profiles);
+  await setGlobalStateValue(ctx, "profiles", profiles);
 }
 
 export const environment = {
@@ -288,7 +324,7 @@ export const environment = {
   WORKSPACE_STORAGE_PATH: "",
   WORKSPACE_STORAGE_UUID: "",
   WORKSPACE_STORAGE_PATH_UUID: "",
-}
+};
 
 // Set environments from context
 export async function setEnv(ctx: vscode.ExtensionContext) {
@@ -296,16 +332,23 @@ export async function setEnv(ctx: vscode.ExtensionContext) {
   environment.GLOBAL_STORAGE_PATH = path.join(ctx.globalStorageUri.path, "../").replace(/^\\/, "");
 
   // Set workspace storage path
-  if (ctx.storageUri) environment.WORKSPACE_STORAGE_PATH = path.join(ctx.storageUri.path, "../../").replace(/^\\/, "");
+  if (ctx.storageUri) {
+    environment.WORKSPACE_STORAGE_PATH = path.join(ctx.storageUri.path, "../../").replace(/^\\/, "");
+  }
 
   // Set workspace storage UUID
   let folders = vscode.workspace.workspaceFolders;
   if (folders !== undefined) {
     if (folders.length > 1) {
       let uriFolders: vscode.Uri[] = [];
-      for (const folder of folders) uriFolders.push(folder.uri);
+      for (const folder of folders) {
+        uriFolders.push(folder.uri);
+      }
       environment.WORKSPACE_STORAGE_UUID = await getPathWorkspacesUUID(uriFolders);
-    } else environment.WORKSPACE_STORAGE_UUID = await getPathUserWorkspaceStorageUUID(folders[0].uri);
+    } else {
+      environment.WORKSPACE_STORAGE_UUID = await getPathUserWorkspaceStorageUUID(folders[0].uri);
+    }
   }
-  environment.WORKSPACE_STORAGE_PATH_UUID = `${environment.WORKSPACE_STORAGE_PATH}${PLATFORM_SLASH}${environment.WORKSPACE_STORAGE_UUID}${PLATFORM_SLASH}`.replace("//", "/");
+  environment.WORKSPACE_STORAGE_PATH_UUID =
+    `${environment.WORKSPACE_STORAGE_PATH}${PLATFORM_SLASH}${environment.WORKSPACE_STORAGE_UUID}${PLATFORM_SLASH}`.replace("//", "/");
 }
